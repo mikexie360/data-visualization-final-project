@@ -265,20 +265,216 @@
       
       <!-- Swiss Results -->
       <div class="swiss-results">
-        <h3>🇨🇭 Swiss Stage Results</h3>
-        <div 
-          v-for="round in store.singleRun.swiss.rounds" 
-          :key="round.round"
-          class="round-section"
-        >
-          <h4>Round {{ round.round }}</h4>
-          <div class="buckets">
+        <h3>Swiss Stage Results</h3>
+        
+
+
+        <!-- Round-by-Round Results -->
+        <div class="rounds-container">
+          <div 
+            v-for="round in store.singleRun.swiss.rounds" 
+            :key="round.round"
+            class="round-section"
+          >
+            <h4>Round {{ round.round }}</h4>
+            
+            <!-- Buckets and Pairings -->
+            <div class="buckets-container">
+              <div 
+                v-for="(bucketTeams, bucketKey) in round.buckets_names" 
+                :key="bucketKey"
+                class="bucket-section"
+              >
+                <h5 class="bucket-title">{{ bucketKey }} ({{ bucketTeams.length }} teams)</h5>
+                
+                <!-- Pairings in this bucket -->
+                <div class="pairings">
+                  <div 
+                    v-for="(pairing, index) in round.pairings.filter(p => {
+                      const teamA = store.singleRun?.teams.find(t => t.id === p.A)?.name || ''
+                      const teamB = store.singleRun?.teams.find(t => t.id === p.B)?.name || ''
+                      return bucketTeams.includes(teamA) || bucketTeams.includes(teamB)
+                    })" 
+                    :key="index"
+                    class="pairing"
+                  >
+                    <div class="match-result">
+                      <div class="team team-a">{{ store.singleRun.teams.find(t => t.id === pairing.A)?.name }}</div>
+                      <div class="score">
+                        {{ round.matches.find(m => 
+                          (m.A.id === pairing.A && m.B.id === pairing.B) || 
+                          (m.A.id === pairing.B && m.B.id === pairing.A)
+                        )?.final_score?.[0] || '0' }} - 
+                        {{ round.matches.find(m => 
+                          (m.A.id === pairing.A && m.B.id === pairing.B) || 
+                          (m.A.id === pairing.B && m.B.id === pairing.A)
+                        )?.final_score?.[1] || '0' }}
+                      </div>
+                      <div class="team team-b">{{ store.singleRun.teams.find(t => t.id === pairing.B)?.name }}</div>
+                      <div class="winner">
+                        Winner: {{ round.matches.find(m => 
+                          (m.A.id === pairing.A && m.B.id === pairing.B) || 
+                          (m.A.id === pairing.B && m.B.id === pairing.A)
+                        )?.winner?.name || 'TBD' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Records after this round -->
+            <!-- <div class="records-after">
+              <h5>Records After Round {{ round.round }}</h5>
+              <div class="records-grid">
+                <div 
+                  v-for="(record, teamId) in round.records_after" 
+                  :key="teamId"
+                  class="record-item"
+                >
+                  <span class="team-name">{{ store.singleRun.teams.find(t => t.id === teamId)?.name }}</span>
+                  <span class="record">{{ record[0] }}-{{ record[1] }}</span>
+                </div>
+              </div>
+            </div> -->
+          </div>
+        </div>
+                         <!-- Final Standings -->
+                         <div class="final-standings">
+           <h4>Final Standings After Round 5</h4>
+           
+
+           <!-- Rankings by Record Groups -->
+           <div class="record-group-rankings">
+             <h5>Rankings by Final Record</h5>
+             
+             <!-- Group teams by their final records -->
+             <div 
+               v-for="recordGroup in getRecordGroups()" 
+               :key="recordGroup.record"
+               class="record-group"
+             >
+               <h6 class="record-group-title">{{ recordGroup.record }} ({{ recordGroup.teams.length }} teams)</h6>
+               <div class="standings-table">
+                 <div class="table-header">
+                   <span>Rank</span>
+                   <span>Team</span>
+                   <span>Buchholz</span>
+                 </div>
+                 <div 
+                   v-for="(team, index) in recordGroup.teams" 
+                   :key="team.id"
+                   class="table-row"
+                 >
+                   <span class="rank">{{ team.overallRank }}</span>
+                   <span class="team-name">{{ team.name }}</span>
+                   <span class="buchholz">{{ team.buchholz.toFixed(2) }}</span>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+      </div>
+
+      <!-- Swiss Stage Advancement -->
+      <div class="swiss-advancement">
+        <h3>🎯 Swiss Stage Advancement</h3>
+        <div class="advancement-info">
+          <p><strong>Format:</strong> After 5 rounds of Swiss, teams are divided into three groups based on their final ranking</p>
+        </div>
+        
+        <div class="advancement-groups">
+          <!-- Top 3 - Auto Advance to Playoffs -->
+          <div class="advancement-group auto-advance">
+            <h4>🥇 Auto Advance to Playoffs (Top 3)</h4>
+            <div class="team-list">
+              <div 
+                v-for="(teamId, index) in store.singleRun.swiss.rank.order.slice(0, 3)" 
+                :key="teamId"
+                class="team-item"
+              >
+                <span class="rank">#{{ index + 1 }}</span>
+                <span class="team-name">{{ store.singleRun.teams.find(t => t.id === teamId)?.name }}</span>
+                <span class="record">{{ store.singleRun.swiss.records_final[teamId][0] }}-{{ store.singleRun.swiss.records_final[teamId][1] }}</span>
+                <span class="buchholz">{{ store.singleRun.swiss.rank.buchholz[teamId]?.toFixed(2) || '0.00' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Teams 4-13 - Elimination Round -->
+          <div class="advancement-group elimination-round">
+            <h4>⚔️ Elimination Round (Teams 4-13)</h4>
+            <div class="team-list">
+              <div 
+                v-for="(teamId, index) in store.singleRun.swiss.rank.order.slice(3, 13)" 
+                :key="teamId"
+                class="team-item"
+              >
+                <span class="rank">#{{ index + 4 }}</span>
+                <span class="team-name">{{ store.singleRun.teams.find(t => t.id === teamId)?.name }}</span>
+                <span class="record">{{ store.singleRun.swiss.records_final[teamId][0] }}-{{ store.singleRun.swiss.records_final[teamId][1] }}</span>
+                <span class="buchholz">{{ store.singleRun.swiss.rank.buchholz[teamId]?.toFixed(2) || '0.00' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Teams 14-16 - Eliminated -->
+          <div class="advancement-group eliminated">
+            <h4>❌ Eliminated (Teams 14-16)</h4>
+            <div class="team-list">
+              <div 
+                v-for="(teamId, index) in store.singleRun.swiss.rank.order.slice(13, 16)" 
+                :key="teamId"
+                class="team-item"
+              >
+                <span class="rank">#{{ index + 14 }}</span>
+                <span class="team-name">{{ store.singleRun.teams.find(t => t.id === teamId)?.name }}</span>
+                <span class="record">{{ store.singleRun.swiss.records_final[teamId][0] }}-{{ store.singleRun.swiss.records_final[teamId][1] }}</span>
+                <span class="buchholz">{{ store.singleRun.swiss.rank.buchholz[teamId]?.toFixed(2) || '0.00' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Elimination Round Results -->
+      <div class="elimination-results">
+        <h3>⚔️ Elimination Round Results</h3>
+        <div class="elimination-matches">
+          <div class="elimination-info">
+            <p><strong>Format:</strong> Top 10 teams from Swiss stage compete in single elimination to reduce to 5 teams for playoffs</p>
+          </div>
+          
+          <div class="matches-container">
             <div 
-              v-for="(teams, bucket) in round.buckets_names" 
-              :key="bucket"
-              class="bucket"
+              v-for="(match, index) in store.singleRun.elimination_round.matches" 
+              :key="index"
+              class="elimination-match"
             >
-                              <strong>{{ bucket }}:</strong> {{ store.teams.map(t => t.name).join(', ') }}
+              <div class="match-header">
+                <h4>Match {{ index + 1 }}</h4>
+              </div>
+              <div class="match-content">
+                <div class="team team-a">{{ match.A.name }}</div>
+                <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
+                <div class="team team-b">{{ match.B.name }}</div>
+                <div class="winner">
+                  <strong>Winner: {{ match.winner.name }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="elimination-summary">
+            <h4>Teams Advancing to Playoffs</h4>
+            <div class="advancing-teams">
+              <div 
+                v-for="winnerId in store.singleRun.elimination_round.winners" 
+                :key="winnerId"
+                class="advancing-team"
+              >
+                {{ store.singleRun.teams.find(t => t.id === winnerId)?.name }}
+              </div>
             </div>
           </div>
         </div>
@@ -527,6 +723,54 @@ async function runSingleSimulation() {
   } finally {
     store.isRunning = false
   }
+}
+
+// Helper function to group teams by their final records
+function getRecordGroups() {
+  if (!store.singleRun) return []
+  
+  const recordGroups: { [key: string]: Array<{
+    id: number
+    name: string
+    overallRank: number
+    buchholz: number
+  }> } = {}
+  
+  // Group teams by their final record
+  store.singleRun.swiss.rank.order.forEach((teamId, index) => {
+    const team = store.singleRun!.teams.find(t => t.id === teamId)
+    const record = store.singleRun!.swiss.records_final[teamId]
+    const buchholz = store.singleRun!.swiss.rank.buchholz[teamId] || 0
+    
+    if (team && record) {
+      const recordKey = `${record[0]}-${record[1]}`
+      if (!recordGroups[recordKey]) {
+        recordGroups[recordKey] = []
+      }
+      
+      recordGroups[recordKey].push({
+        id: teamId,
+        name: team.name,
+        overallRank: index + 1,
+        buchholz: buchholz
+      })
+    }
+  })
+  
+  // Convert to array and sort by record (4-0, 4-1, 3-2, 3-3, 2-4, 1-4, 0-4)
+  return Object.entries(recordGroups)
+    .map(([record, teams]) => ({
+      record,
+      teams: teams.sort((a, b) => b.buchholz - a.buchholz) // Sort by Buchholz within each record group
+    }))
+    .sort((a, b) => {
+      // Sort record groups by wins first, then by losses
+      const [aWins, aLosses] = a.record.split('-').map(Number)
+      const [bWins, bLosses] = b.record.split('-').map(Number)
+      
+      if (aWins !== bWins) return bWins - aWins // Higher wins first
+      return aLosses - bLosses // Lower losses first
+    })
 }
 
 // Lifecycle
@@ -986,28 +1230,367 @@ onMounted(() => {
   margin-bottom: 30px;
 }
 
-.round-section {
+.final-standings {
+  margin-bottom: 30px;
+}
+
+.final-standings h4 {
+  color: #374151;
   margin-bottom: 20px;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 8px;
+  font-size: 1.3em;
+}
+
+.overall-rankings {
+  margin-bottom: 30px;
+}
+
+.overall-rankings h5 {
+  color: #374151;
+  margin-bottom: 15px;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.record-group-rankings h5 {
+  color: #374151;
+  margin-bottom: 20px;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.record-group {
+  margin-bottom: 25px;
+}
+
+.record-group-title {
+  color: #374151;
+  margin-bottom: 12px;
+  font-size: 1em;
+  font-weight: 600;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border-left: 4px solid #3b82f6;
+}
+
+.standings-table {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.standings-table .table-header {
+  display: grid;
+  grid-template-columns: 80px 1fr 100px 120px;
+  background: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.standings-table .table-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 100px 120px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s ease;
+}
+
+.standings-table .table-row:hover {
+  background: #f9fafb;
+}
+
+.standings-table .table-row:last-child {
+  border-bottom: none;
+}
+
+.standings-table .rank {
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.standings-table .team-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.standings-table .record {
+  font-weight: 600;
+  color: #059669;
+  text-align: center;
+}
+
+.standings-table .buchholz {
+  font-weight: 600;
+  color: #7c3aed;
+  text-align: center;
+}
+
+.rounds-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.round-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  background: #fafafa;
 }
 
 .round-section h4 {
   color: #374151;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 5px;
+  padding-bottom: 10px;
+  font-size: 1.2em;
 }
 
-.buckets {
+.buckets-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.bucket-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 15px;
+}
+
+.bucket-title {
+  color: #374151;
+  margin-bottom: 15px;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.pairings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pairing {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.match-result {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 15px;
+  align-items: center;
+}
+
+.match-result .team {
+  font-weight: 500;
+  color: #1f2937;
+  text-align: center;
+}
+
+.match-result .score {
+  font-weight: 600;
+  color: #059669;
+  text-align: center;
+  background: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  min-width: 60px;
+}
+
+.match-result .winner {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-weight: 600;
+  color: #059669;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.records-after {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 15px;
+}
+
+.records-after h5 {
+  color: #374151;
+  margin-bottom: 15px;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.records-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.record-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: #f9fafb;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.record-item .team-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.record-item .record {
+  font-weight: 600;
+  color: #059669;
+}
+
+.elimination-results {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.elimination-results h3 {
+  color: #374151;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #dc2626;
+  padding-bottom: 10px;
+  font-size: 1.3em;
+}
+
+.elimination-info {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.elimination-info p {
+  margin: 0;
+  color: #991b1b;
+  font-size: 0.95em;
+}
+
+.matches-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.elimination-match {
+  background: #f9fafb;
+  border: 2px solid #dc2626;
+  border-radius: 8px;
+  padding: 15px;
+  transition: transform 0.2s ease;
+}
+
+.elimination-match:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+}
+
+.match-header h4 {
+  margin: 0 0 12px 0;
+  color: #dc2626;
+  font-size: 1.1em;
+  font-weight: 600;
+  text-align: center;
+}
+
+.match-content {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.match-content .team {
+  font-weight: 500;
+  color: #1f2937;
+  text-align: center;
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.match-content .score {
+  font-weight: 600;
+  color: #dc2626;
+  text-align: center;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 2px solid #dc2626;
+  min-width: 70px;
+  font-size: 1.1em;
+}
+
+.match-content .winner {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-weight: 600;
+  color: #dc2626;
+  margin-top: 10px;
+  padding: 8px;
+  background: #fef2f2;
+  border-radius: 4px;
+  border: 1px solid #fecaca;
+}
+
+.elimination-summary {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  padding: 20px;
+}
+
+.elimination-summary h4 {
+  color: #0369a1;
+  margin-bottom: 15px;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.advancing-teams {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 10px;
 }
 
-.bucket {
-  background: #f9fafb;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 14px;
+.advancing-team {
+  background: white;
+  border: 2px solid #0ea5e9;
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+  color: #0369a1;
+  transition: all 0.2s ease;
+}
+
+.advancing-team:hover {
+  background: #0ea5e9;
+  color: white;
+  transform: scale(1.02);
 }
 
 .playoff-bracket {
@@ -1129,6 +1712,142 @@ onMounted(() => {
   font-size: 1.1em;
 }
 
+/* Swiss Stage Advancement Styles */
+.swiss-advancement {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.swiss-advancement h3 {
+  color: #374151;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #3b82f6;
+  padding-bottom: 10px;
+  font-size: 1.3em;
+}
+
+.advancement-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.advancement-info p {
+  margin: 0;
+  color: #1e40af;
+  font-size: 0.95em;
+}
+
+.advancement-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.advancement-group {
+  border-radius: 8px;
+  padding: 20px;
+  transition: transform 0.2s ease;
+}
+
+.advancement-group:hover {
+  transform: translateY(-2px);
+}
+
+.advancement-group h4 {
+  margin: 0 0 15px 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  text-align: center;
+}
+
+.auto-advance {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 2px solid #22c55e;
+}
+
+.auto-advance h4 {
+  color: #15803d;
+}
+
+.elimination-round {
+  background: linear-gradient(135deg, #fef2f2, #fecaca);
+  border: 2px solid #dc2626;
+}
+
+.elimination-round h4 {
+  color: #991b1b;
+}
+
+.eliminated {
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  border: 2px solid #6b7280;
+}
+
+.eliminated h4 {
+  color: #374151;
+}
+
+.team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.team-item:hover {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.team-item .rank {
+  font-weight: 600;
+  color: #6b7280;
+  min-width: 30px;
+}
+
+.team-item .team-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.team-item .record {
+  font-weight: 600;
+  color: #059669;
+  background: #f0fdf4;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #bbf7d0;
+  text-align: center;
+  min-width: 50px;
+}
+
+.team-item .buchholz {
+  font-weight: 600;
+  color: #7c3aed;
+  background: #faf5ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd6fe;
+  text-align: center;
+  min-width: 60px;
+}
+
 @media (max-width: 768px) {
   .config-grid {
     grid-template-columns: 1fr;
@@ -1145,6 +1864,10 @@ onMounted(() => {
   }
   
   .buckets {
+    grid-template-columns: 1fr;
+  }
+  
+  .advancement-groups {
     grid-template-columns: 1fr;
   }
 }

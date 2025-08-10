@@ -199,12 +199,62 @@ export class TournamentSimulator {
     return a < b ? [a, b] : [b, a]
   }
 
-  private pairBucketStrict(bucketTeams: number[], played: Set<string>): Array<[number, number]> {
+  private pairBucketStrict(
+    bucketTeams: number[], 
+    played: Set<string>, 
+    seedOrder?: number[], 
+    pairingStyle?: '1v16' | 'adjacent'
+  ): Array<[number, number]> {
     const teams = [...bucketTeams]
     if (teams.length % 2 !== 0) {
       throw new Error(`Bucket has odd size ${teams.length}; Swiss should keep buckets even.`)
     }
 
+    // If we have seeding order and pairing style, use them for structured pairing
+    if (seedOrder && pairingStyle) {
+      // Filter seed order to only include teams in this bucket
+      const orderedTeams = seedOrder.filter(t => teams.includes(t))
+      
+      if (orderedTeams.length === teams.length) {
+        // Try to pair according to the pairing style
+        const pairs: Array<[number, number]> = []
+        
+        if (pairingStyle === '1v16') {
+          // Pair best vs worst within the bucket
+          for (let i = 0; i < orderedTeams.length / 2; i++) {
+            const a = orderedTeams[i]
+            const b = orderedTeams[orderedTeams.length - 1 - i]
+            const key = `${Math.min(a, b)}-${Math.max(a, b)}`
+            if (!played.has(key)) {
+              pairs.push([a, b])
+            } else {
+              // If this pair has already played, fall back to random
+              break
+            }
+          }
+        } else if (pairingStyle === 'adjacent') {
+          // Pair adjacent teams within the bucket
+          for (let i = 0; i < orderedTeams.length; i += 2) {
+            const a = orderedTeams[i]
+            const b = orderedTeams[i + 1]
+            const key = `${Math.min(a, b)}-${Math.max(a, b)}`
+            if (!played.has(key)) {
+              pairs.push([a, b])
+            } else {
+              // If this pair has already played, fall back to random
+              break
+            }
+          }
+        }
+        
+        // If we successfully paired all teams without rematches, return the pairs
+        if (pairs.length === teams.length / 2) {
+          return pairs
+        }
+      }
+    }
+
+    // Fallback to random pairing (original logic)
     for (let attempt = 0; attempt < 200; attempt++) {
       const shuffled = this.rng.shuffle(teams)
       let ok = true
@@ -226,7 +276,7 @@ export class TournamentSimulator {
       }
     }
 
-    // Fallback: allow rematch minimally
+    // Final fallback: allow rematch minimally
     const pairs: Array<[number, number]> = []
     for (let i = 0; i < teams.length; i += 2) {
       pairs.push([teams[i], teams[i + 1]])
@@ -326,7 +376,7 @@ export class TournamentSimulator {
           if (group.length % 2 !== 0) {
             throw new Error(`Bucket has odd size ${group.length}`)
           }
-          const pairs = this.pairBucketStrict(group, played)
+          const pairs = this.pairBucketStrict(group, played, config.seed_order, config.pairing_style)
           roundPairs.push(...pairs)
         }
       }
