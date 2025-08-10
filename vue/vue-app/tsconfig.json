@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
+
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
+}

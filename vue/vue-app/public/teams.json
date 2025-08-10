@@ -1,0 +1,21 @@
+{
+"teams": [
+    { "name": "Team Liquid",         "team_id": 2163,    "invitation_type": "direct_invite", "seed": 1 },
+    { "name": "PARIVISION",          "team_id": 9572001, "invitation_type": "direct_invite", "seed": 2 },
+    { "name": "BetBoom Team",        "team_id": 8255888, "invitation_type": "direct_invite", "seed": 3 },
+    { "name": "Team Tidebound",      "team_id": 9640842, "invitation_type": "direct_invite", "seed": 4 },
+    { "name": "Gaimin Gladiators",   "team_id": 8599101, "invitation_type": "direct_invite", "seed": 5 },
+    { "name": "Team Spirit",         "team_id": 7119388, "invitation_type": "direct_invite", "seed": 6 },
+    { "name": "Team Falcons",        "team_id": 9247354, "invitation_type": "direct_invite", "seed": 7 },
+    { "name": "Tundra Esports",      "team_id": 8291895, "invitation_type": "direct_invite", "seed": 8 },
+
+    { "name": "Natus Vincere",       "team_id": 36,      "invitation_type": "regional_qualifier", "seed": 9 },
+    { "name": "Nigma Galaxy",        "team_id": 7554697, "invitation_type": "regional_qualifier", "seed": 10 },
+    { "name": "Aurora Gaming",       "team_id": 9467224, "invitation_type": "regional_qualifier", "seed": 11 },
+    { "name": "Xtreme Gaming",       "team_id": 8261500, "invitation_type": "regional_qualifier", "seed": 12 },
+    { "name": "Team Nemesis",        "team_id": 9691969, "invitation_type": "regional_qualifier", "seed": 13 },
+    { "name": "BOOM Esports",        "team_id": 7732977, "invitation_type": "regional_qualifier", "seed": 14 },
+    { "name": "Wildcard",            "team_id": 8606828, "invitation_type": "regional_qualifier", "seed": 15 },
+    { "name": "HEROIC",              "team_id": 9303484, "invitation_type": "regional_qualifier", "seed": 16 }
+  ]
+}

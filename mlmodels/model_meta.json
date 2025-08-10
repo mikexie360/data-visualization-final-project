@@ -1,0 +1,16 @@
+{
+  "created_utc": 1754771176.6442935,
+  "python": "3.11.13",
+  "sklearn_version": "1.6.1",
+  "xgboost_version": "3.0.3",
+  "n_features": 760,
+  "feature_sample": [
+    "radiant_team_id",
+    "dire_team_id",
+    "radiant_team_rating",
+    "radiant_team_wins",
+    "radiant_team_losses"
+  ],
+  "best_iteration": 1664,
+  "best_ntree_limit": null
+}
