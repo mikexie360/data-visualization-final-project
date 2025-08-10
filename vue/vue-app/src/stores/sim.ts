@@ -30,7 +30,7 @@ export const useSimStore = defineStore('sim', () => {
     verbose: false
   })
 
-  const seedingType = ref('random')
+  const seedingType = ref('random_1v16')
   const rngSeed = ref(42)
   const customSeedOrder = ref<Team[]>([])
   const customPairingStyle = ref<'1v16' | 'adjacent'>('1v16')

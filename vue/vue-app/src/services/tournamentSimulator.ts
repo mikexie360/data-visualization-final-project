@@ -343,8 +343,16 @@ export class TournamentSimulator {
 
         if (config.random_seeding) {
           const shuffled = this.rng.shuffle(s)
-          for (let i = 0; i < 16; i += 2) {
-            roundPairs.push([shuffled[i], shuffled[i + 1]])
+          if (config.pairing_style === '1v16') {
+            // Pair best vs worst within the shuffled array
+            for (let i = 0; i < 8; i++) {
+              roundPairs.push([shuffled[i], shuffled[shuffled.length - 1 - i]])
+            }
+          } else if (config.pairing_style === 'adjacent') {
+            // Pair adjacent teams within the shuffled array
+            for (let i = 0; i < 16; i += 2) {
+              roundPairs.push([shuffled[i], shuffled[i + 1]])
+            }
           }
         } else {
           const useOrder = config.seed_order || []

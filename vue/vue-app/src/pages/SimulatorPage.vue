@@ -29,7 +29,6 @@
             v-model="store.seedingType" 
             :disabled="store.isRunning"
           >
-            <option value="random">Random</option>
             <option value="random_1v16">Random (1v16)</option>
             <option value="random_adjacent">Random (Adjacent)</option>
             <option value="seeded_1v16">Seeded (1v16)</option>
