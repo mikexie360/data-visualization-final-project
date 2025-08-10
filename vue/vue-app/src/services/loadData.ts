@@ -13,16 +13,22 @@ function keysToNumber(obj: Record<string, any>): any {
   return obj
 }
 
-export async function loadAll(): Promise<{ teams: Team[]; matrix: ProbMatrix }> {
-  const [teamsRes, matrixRes] = await Promise.all([
-    fetch('/teams.json'),
-    fetch('/prob_matrix.json'),
-  ])
-  const teamsJson = await teamsRes.json()
-  const matrixJson = await matrixRes.json()
+export async function loadTeams(): Promise<Team[]> {
+  const response = await fetch('/teams.json')
+  const data = await response.json()
+  return data.teams as Team[]
+}
 
-  return {
-    teams: (teamsJson.teams ?? teamsJson) as Team[],
-    matrix: keysToNumber(matrixJson) as ProbMatrix,
-  }
+export async function loadProbMatrix(): Promise<ProbMatrix> {
+  const response = await fetch('/probMatrix.json')
+  const data = await response.json()
+  return data as ProbMatrix
+}
+
+export async function loadAll(): Promise<{ teams: Team[]; matrix: ProbMatrix }> {
+  const [teams, matrix] = await Promise.all([
+    loadTeams(),
+    loadProbMatrix()
+  ])
+  return { teams, matrix }
 }
