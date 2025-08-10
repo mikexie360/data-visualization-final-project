@@ -56,6 +56,13 @@ export const useSimStore = defineStore('sim', () => {
     teams.value = teamsData
     probMatrix.value = probMatrixData
     isDataLoaded.value = true
+    
+    // Initialize custom seed order with all teams
+    customSeedOrder.value = [...teamsData]
+  }
+
+  function resetCustomSeedOrder() {
+    customSeedOrder.value = [...teams.value]
   }
 
   function updateConfig() {
@@ -224,6 +231,7 @@ export const useSimStore = defineStore('sim', () => {
     
     // Actions
     setData,
+    resetCustomSeedOrder,
     updateConfig,
     simulateSingleRun,
     runMonteCarlo,

@@ -55,6 +55,13 @@
           <div class="custom-seeds">
             <div class="custom-seeds-header">
               {{ store.customPairingStyle === '1v16' ? '1v16 Pairing: Strongest vs Weakest teams' : 'Adjacent Pairing: Similar strength teams' }}
+              <button 
+                @click="store.resetCustomSeedOrder()" 
+                class="reset-seeds-btn"
+                :disabled="store.isRunning"
+              >
+                Reset Order
+              </button>
             </div>
             <div 
               v-for="(team, index) in store.customSeedOrder" 
@@ -862,6 +869,30 @@ onMounted(() => {
   font-size: 12px;
   color: #6b7280;
   font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reset-seeds-btn {
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.reset-seeds-btn:hover:not(:disabled) {
+  background: #4b5563;
+}
+
+.reset-seeds-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
 }
 
 .seed-item {
