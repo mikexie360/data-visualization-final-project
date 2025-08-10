@@ -1,35 +1,22 @@
-# ---------- Build ----------
-    FROM node:20.19.0-alpine AS build
-    WORKDIR /app
-    
-    # Ensure devDependencies (vue-tsc, vite, etc.) are available
-    ENV NPM_CONFIG_PRODUCTION=false
-    RUN apk add --no-cache libc6-compat
-    
-    # 1) Install deps first for caching
-    COPY package*.json ./
-    RUN npm ci
-    
-    # 2) Copy only what the build needs (avoid repeated COPY .)
-    COPY tsconfig*.json ./
-    COPY vite.config.* ./
-    COPY index.html ./
-    COPY public ./public
-    COPY src ./src
-    
-    # (Optional) sanity check:
-    # RUN npx vue-tsc --showConfig | grep -i '"module"'
-    
-    # 3) Type-check using the app project file, then build
-    # If you don't have tsconfig.app.json, change to your actual tsconfig path.
-    RUN npx vue-tsc --noEmit -p tsconfig.app.json
-    RUN npx vite build
-    
-    # ---------- Runtime ----------
-    FROM caddy:2-alpine AS runtime
-    # If you have a custom Caddyfile, format it like your logs show and use it
-    COPY assets/Caddyfile /etc/caddy/Caddyfile
-    COPY --from=build /app/dist /srv
-    EXPOSE 80
-    CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
-    
+FROM node:lts-alpine
+
+# install simple http server for serving static content
+RUN npm install -g http-server
+
+# make the 'app' folder the current working directory
+WORKDIR /app
+
+# copy both 'package.json' and 'package-lock.json' (if available)
+COPY package*.json ./
+
+# install project dependencies
+RUN npm install
+
+# copy project files and folders to the current working directory (i.e. 'app' folder)
+COPY . .
+
+# build app for production with minification
+RUN npm run build
+
+EXPOSE 8080
+CMD [ "http-server", "dist" ]
