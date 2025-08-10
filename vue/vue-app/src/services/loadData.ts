@@ -22,7 +22,7 @@ export async function loadTeams(): Promise<Team[]> {
 export async function loadProbMatrix(): Promise<ProbMatrix> {
   const response = await fetch('/probMatrix.json')
   const data = await response.json()
-  return data as ProbMatrix
+  return keysToNumber(data) as ProbMatrix
 }
 
 export async function loadAll(): Promise<{ teams: Team[]; matrix: ProbMatrix }> {

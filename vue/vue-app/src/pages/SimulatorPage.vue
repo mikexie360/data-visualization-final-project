@@ -8,16 +8,17 @@
     <!-- Configuration Panel -->
     <div class="config-panel">
       <h2>Simulation Parameters</h2>
+      
       <div class="config-grid">
         <div class="config-item">
           <label for="num-simulations">Number of Simulations:</label>
           <input 
             id="num-simulations"
-            v-model.number="config.num_simulations" 
+            v-model.number="store.config.num_simulations" 
             type="number" 
             min="1" 
             max="10000"
-            :disabled="isRunning"
+            :disabled="store.isRunning"
           />
         </div>
 
@@ -25,8 +26,8 @@
           <label for="seeding-type">Round 1 Seeding:</label>
           <select 
             id="seeding-type"
-            v-model="seedingType" 
-            :disabled="isRunning"
+            v-model="store.seedingType" 
+            :disabled="store.isRunning"
           >
             <option value="random">Random</option>
             <option value="random_1v16">Random (1v16)</option>
@@ -37,26 +38,26 @@
           </select>
         </div>
 
-        <div v-if="seedingType === 'custom'" class="config-item">
+        <div v-if="store.seedingType === 'custom'" class="config-item">
           <label for="custom-pairing">Custom Seeds Pairing Style:</label>
           <select 
             id="custom-pairing"
-            v-model="customPairingStyle" 
-            :disabled="isRunning"
+            v-model="store.customPairingStyle" 
+            :disabled="store.isRunning"
           >
             <option value="1v16">1v16 (Strongest vs Weakest)</option>
             <option value="adjacent">Adjacent (Similar Strength)</option>
           </select>
         </div>
 
-        <div v-if="seedingType === 'custom'" class="config-item">
+        <div v-if="store.seedingType === 'custom'" class="config-item">
           <label>Custom Team Seeds (Drag to reorder):</label>
           <div class="custom-seeds">
             <div class="custom-seeds-header">
-              {{ customPairingStyle === '1v16' ? '1v16 Pairing: Strongest vs Weakest teams' : 'Adjacent Pairing: Similar strength teams' }}
+              {{ store.customPairingStyle === '1v16' ? '1v16 Pairing: Strongest vs Weakest teams' : 'Adjacent Pairing: Similar strength teams' }}
             </div>
             <div 
-              v-for="(team, index) in customSeedOrder" 
+              v-for="(team, index) in store.customSeedOrder" 
               :key="team.team_id"
               class="seed-item"
               draggable="true"
@@ -74,24 +75,24 @@
           <label for="rng-seed">RNG Seed:</label>
           <input 
             id="rng-seed"
-            v-model.number="rngSeed" 
+            v-model.number="store.rngSeed" 
             type="number" 
-            :disabled="isRunning"
+            :disabled="store.isRunning"
           />
         </div>
       </div>
 
       <div class="config-actions">
         <button 
-          @click="runSimulation" 
-          :disabled="isRunning || !isDataLoaded"
+          @click="() => { console.log('Run Simulation button clicked'); runSimulation(); }" 
+          :disabled="store.isRunning || !store.isDataLoaded"
           class="run-btn"
         >
-          {{ isRunning ? 'Running...' : 'Run Simulation' }}
+          {{ store.isRunning ? 'Running...' : 'Run Simulation' }}
         </button>
         <button 
-          @click="runSingleSimulation" 
-          :disabled="isRunning || !isDataLoaded"
+          @click="() => { console.log('Run Single Tournament button clicked'); runSingleSimulation(); }" 
+          :disabled="store.isRunning || !store.isDataLoaded"
           class="single-btn"
         >
           Run Single Tournament
@@ -100,23 +101,23 @@
     </div>
 
          <!-- Loading State -->
-     <div v-if="!isDataLoaded" class="loading">
+     <div v-if="!store.isDataLoaded" class="loading">
        <div class="spinner"></div>
        <p>Loading tournament data...</p>
      </div>
 
      <!-- Simulation Progress -->
-     <div v-if="isRunning" class="simulation-progress">
+     <div v-if="store.isRunning" class="simulation-progress">
        <div class="progress-header">
          <div class="spinner"></div>
-         <h3>{{ progress.isMonteCarlo ? 'Running Monte Carlo Simulation' : 'Running Single Tournament' }}</h3>
+         <h3>{{ store.progress.isMonteCarlo ? 'Running Monte Carlo Simulation' : 'Running Single Tournament' }}</h3>
        </div>
        
        <div class="progress-info">
          <div class="progress-text">
-           <span class="current">{{ progress.current }}</span>
+           <span class="current">{{ store.progress.current }}</span>
            <span class="separator">/</span>
-           <span class="total">{{ progress.total }}</span>
+           <span class="total">{{ store.progress.total }}</span>
            <span class="label">tournaments</span>
          </div>
          
@@ -124,23 +125,23 @@
            <div class="progress-bar">
              <div 
                class="progress-fill" 
-               :style="{ width: progress.total > 0 ? `${(progress.current / progress.total) * 100}%` : '0%' }"
+               :style="{ width: store.progress.total > 0 ? `${(store.progress.current / store.progress.total) * 100}%` : '0%' }"
              ></div>
            </div>
            <span class="progress-percentage">
-             {{ progress.total > 0 ? Math.round((progress.current / progress.total) * 100) : 0 }}%
+             {{ store.progress.total > 0 ? Math.round((store.progress.current / store.progress.total) * 100) : 0 }}%
            </span>
          </div>
          
          <div class="current-stage">
            <span class="stage-label">Current Stage:</span>
-           <span class="stage-name">{{ progress.stage }}</span>
+           <span class="stage-name">{{ store.progress.stage }}</span>
          </div>
        </div>
      </div>
 
     <!-- Results -->
-    <div v-if="results && !isRunning" class="results">
+    <div v-if="store.results && !store.isRunning" class="results">
              <!-- Title Odds -->
        <div class="result-section">
          <h2>🏆 Championship Win Probabilities</h2>
@@ -150,7 +151,7 @@
              <span>Win Probability</span>
            </div>
            <div 
-             v-for="(team, index) in getAllTeamsForChampionship()" 
+             v-for="(team, index) in store.getAllTeamsForChampionship()" 
              :key="team.team_id"
              class="table-row"
            >
@@ -165,7 +166,7 @@
         <h2>🇨🇭 Swiss Stage Reach Probabilities</h2>
         <div class="swiss-buckets">
           <div 
-            v-for="(bucket, bucketKey) in results.swiss_final_probs" 
+            v-for="(bucket, bucketKey) in store.results.swiss_final_probs" 
             :key="bucketKey"
             class="bucket-section"
           >
@@ -176,7 +177,7 @@
                 <span>Reach Probability</span>
               </div>
               <div 
-                v-for="team in getAllTeamsForBucket(bucketKey)" 
+                v-for="team in store.getAllTeamsForBucket(bucketKey)" 
                 :key="team.team_id"
                 class="table-row"
               >
@@ -199,7 +200,7 @@
               <span>Participation Rate</span>
             </div>
             <div 
-              v-for="team in getAllTeamsForElimination('participation')" 
+              v-for="team in store.getAllTeamsForElimination('participation')" 
               :key="team.team_id"
               class="table-row"
             >
@@ -215,7 +216,7 @@
               <span>Advancement Rate</span>
             </div>
             <div 
-              v-for="team in getAllTeamsForElimination('advancement')" 
+              v-for="team in store.getAllTeamsForElimination('advancement')" 
               :key="team.team_id"
               class="table-row"
             >
@@ -231,7 +232,7 @@
         <h2>🏅 Playoff Stage Reach Probabilities</h2>
         <div class="playoff-stages">
           <div 
-            v-for="(stage, stageKey) in playoffStages" 
+            v-for="(stage, stageKey) in store.playoffStages" 
             :key="stageKey"
             class="stage-section"
           >
@@ -242,7 +243,7 @@
                 <span>Reach Probability</span>
               </div>
               <div 
-                v-for="team in getAllTeamsForStage(stageKey)" 
+                v-for="team in store.getAllTeamsForStage(stageKey)" 
                 :key="team.team_id"
                 class="table-row"
               >
@@ -256,17 +257,17 @@
     </div>
 
     <!-- Single Tournament Results -->
-    <div v-if="singleRun && !isRunning" class="single-results">
+    <div v-if="store.singleRun && !store.isRunning" class="single-results">
       <h2>🎯 Single Tournament Run</h2>
       <div class="champion">
-        <h3>🏆 Champion: {{ singleRun.champion.name }}</h3>
+        <h3>🏆 Champion: {{ store.singleRun.champion.name }}</h3>
       </div>
       
       <!-- Swiss Results -->
       <div class="swiss-results">
         <h3>🇨🇭 Swiss Stage Results</h3>
         <div 
-          v-for="round in singleRun.swiss.rounds" 
+          v-for="round in store.singleRun.swiss.rounds" 
           :key="round.round"
           class="round-section"
         >
@@ -277,7 +278,7 @@
               :key="bucket"
               class="bucket"
             >
-              <strong>{{ bucket }}:</strong> {{ teams.join(', ') }}
+                              <strong>{{ bucket }}:</strong> {{ store.teams.map(t => t.name).join(', ') }}
             </div>
           </div>
         </div>
@@ -293,7 +294,7 @@
               <div class="round">
                 <h5>Quarterfinals</h5>
                 <div 
-                  v-for="match in singleRun.playoffs.UB.QF" 
+                  v-for="match in store.singleRun.playoffs.UB.QF" 
                   :key="match.label"
                   class="match"
                 >
@@ -306,7 +307,7 @@
               <div class="round">
                 <h5>Semifinals</h5>
                 <div 
-                  v-for="match in singleRun.playoffs.UB.SF" 
+                  v-for="match in store.singleRun.playoffs.UB.SF" 
                   :key="match.label"
                   class="match"
                 >
@@ -319,10 +320,10 @@
               <div class="round">
                 <h5>Final</h5>
                 <div class="match">
-                  <div class="team">{{ singleRun.playoffs.UB.Final.A.name }}</div>
-                  <div class="score">{{ singleRun.playoffs.UB.Final.final_score[0] }}-{{ singleRun.playoffs.UB.Final.final_score[1] }}</div>
-                  <div class="team">{{ singleRun.playoffs.UB.Final.B.name }}</div>
-                  <div class="winner">Winner: {{ singleRun.playoffs.UB.Final.winner.name }}</div>
+                  <div class="team">{{ store.singleRun.playoffs.UB.Final.A.name }}</div>
+                  <div class="score">{{ store.singleRun.playoffs.UB.Final.final_score[0] }}-{{ store.singleRun.playoffs.UB.Final.final_score[1] }}</div>
+                  <div class="team">{{ store.singleRun.playoffs.UB.Final.B.name }}</div>
+                  <div class="winner">Winner: {{ store.singleRun.playoffs.UB.Final.winner.name }}</div>
                 </div>
               </div>
             </div>
@@ -334,7 +335,7 @@
               <div class="round">
                 <h5>Round 1</h5>
                 <div 
-                  v-for="match in singleRun.playoffs.LB.R1" 
+                  v-for="match in store.singleRun.playoffs.LB.R1" 
                   :key="match.label"
                   class="match"
                 >
@@ -347,7 +348,7 @@
               <div class="round">
                 <h5>Round 2</h5>
                 <div 
-                  v-for="match in singleRun.playoffs.LB.R2" 
+                  v-for="match in store.singleRun.playoffs.LB.R2" 
                   :key="match.label"
                   class="match"
                 >
@@ -360,19 +361,19 @@
               <div class="round">
                 <h5>Quarterfinal</h5>
                 <div class="match">
-                  <div class="team">{{ singleRun.playoffs.LB.QF.A.name }}</div>
-                  <div class="score">{{ singleRun.playoffs.LB.QF.final_score[0] }}-{{ singleRun.playoffs.LB.QF.final_score[1] }}</div>
-                  <div class="team">{{ singleRun.playoffs.LB.QF.B.name }}</div>
-                  <div class="winner">Winner: {{ singleRun.playoffs.LB.QF.winner.name }}</div>
+                  <div class="team">{{ store.singleRun.playoffs.LB.QF.A.name }}</div>
+                  <div class="score">{{ store.singleRun.playoffs.LB.QF.final_score[0] }}-{{ store.singleRun.playoffs.LB.QF.final_score[1] }}</div>
+                  <div class="team">{{ store.singleRun.playoffs.LB.QF.B.name }}</div>
+                  <div class="winner">Winner: {{ store.singleRun.playoffs.LB.QF.winner.name }}</div>
                 </div>
               </div>
               <div class="round">
                 <h5>Final</h5>
                 <div class="match">
-                  <div class="team">{{ singleRun.playoffs.LB.Final.A.name }}</div>
-                  <div class="score">{{ singleRun.playoffs.LB.Final.final_score[0] }}-{{ singleRun.playoffs.LB.Final.final_score[1] }}</div>
-                  <div class="team">{{ singleRun.playoffs.LB.Final.B.name }}</div>
-                  <div class="winner">Winner: {{ singleRun.playoffs.LB.Final.winner.name }}</div>
+                  <div class="team">{{ store.singleRun.playoffs.LB.Final.A.name }}</div>
+                  <div class="score">{{ store.singleRun.playoffs.LB.Final.final_score[0] }}-{{ store.singleRun.playoffs.LB.Final.final_score[1] }}</div>
+                  <div class="team">{{ store.singleRun.playoffs.LB.Final.B.name }}</div>
+                  <div class="winner">Winner: {{ store.singleRun.playoffs.LB.Final.winner.name }}</div>
                 </div>
               </div>
             </div>
@@ -382,10 +383,10 @@
         <div class="grand-final">
           <h4>Grand Final</h4>
           <div class="match">
-            <div class="team">{{ singleRun.playoffs.GF.A.name }}</div>
-            <div class="score">{{ singleRun.playoffs.GF.final_score[0] }}-{{ singleRun.playoffs.GF.final_score[1] }}</div>
-            <div class="team">{{ singleRun.playoffs.GF.B.name }}</div>
-            <div class="winner">🏆 Champion: {{ singleRun.playoffs.GF.winner.name }}</div>
+            <div class="team">{{ store.singleRun.playoffs.GF.A.name }}</div>
+            <div class="score">{{ store.singleRun.playoffs.GF.final_score[0] }}-{{ store.singleRun.playoffs.GF.final_score[1] }}</div>
+            <div class="team">{{ store.singleRun.playoffs.GF.B.name }}</div>
+            <div class="winner">🏆 Champion: {{ store.singleRun.playoffs.GF.winner.name }}</div>
           </div>
         </div>
       </div>
@@ -394,185 +395,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { TournamentSimulator, type SimulationConfig, type SimulationStats, type TournamentRun } from '@/services/tournamentSimulator'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { useSimStore } from '@/stores/sim'
 import { loadTeams, loadProbMatrix } from '@/services/loadData'
+import { TournamentSimulator } from '@/services/tournamentSimulator'
 import type { Team, ProbMatrix } from '@/types'
 
-// State
-const isDataLoaded = ref(false)
-const isRunning = ref(false)
-const teams = ref<Team[]>([])
-const probMatrix = ref<ProbMatrix>({})
-const results = ref<SimulationStats | null>(null)
-const singleRun = ref<TournamentRun | null>(null)
+const store = useSimStore()
 
-// Progress tracking
-const progress = ref({
-  current: 0,
-  total: 0,
-  stage: '',
-  isMonteCarlo: false
-})
-
-// Configuration
-const config = ref<SimulationConfig>({
-  random_seeding: true,
-  pairing_style: '1v16',
-  num_simulations: 100,
-  verbose: false
-})
-
-const seedingType = ref('random')
-const rngSeed = ref(42)
-const customSeedOrder = ref<Team[]>([])
-const customPairingStyle = ref<'1v16' | 'adjacent'>('1v16')
+// Drag and drop functionality
 const draggedIndex = ref<number | null>(null)
-
-// Computed
-const playoffStages = computed(() => ({
-  'UB_QF': { name: 'Upper Bracket Quarterfinals' },
-  'UB_SF': { name: 'Upper Bracket Semifinals' },
-  'UB_Final': { name: 'Upper Bracket Final' },
-  'LB_R1': { name: 'Lower Bracket Round 1' },
-  'LB_R2': { name: 'Lower Bracket Round 2' },
-  'LB_QF': { name: 'Lower Bracket Quarterfinal' },
-  'LB_Final': { name: 'Lower Bracket Final' },
-  'GF': { name: 'Grand Final' }
-}))
-
-// Methods
-function getAllTeamsForBucket(bucketKey: string) {
-  if (!results.value?.swiss_final_probs[bucketKey]) {
-    return teams.value.map(team => ({
-      team_id: team.team_id,
-      team: team.name,
-      prob: 0
-    }))
-  }
-  
-  const bucketTeams = results.value.swiss_final_probs[bucketKey]
-  const allTeams = teams.value.map(team => {
-    const existingTeam = bucketTeams.find(t => t.team_id === team.team_id)
-    return existingTeam || {
-      team_id: team.team_id,
-      team: team.name,
-      prob: 0
-    }
-  })
-  
-  return allTeams.sort((a, b) => b.prob - a.prob)
-}
-
-function getAllTeamsForStage(stageKey: string) {
-  if (!results.value?.stage_probs[stageKey]) {
-    return teams.value.map(team => ({
-      team_id: team.team_id,
-      team: team.name,
-      prob: 0
-    }))
-  }
-  
-  const stageTeams = results.value.stage_probs[stageKey]
-  const allTeams = teams.value.map(team => {
-    const existingTeam = stageTeams.find(t => t.team_id === team.team_id)
-    return existingTeam || {
-      team_id: team.team_id,
-      team: team.name,
-      prob: 0
-    }
-  })
-  
-  return allTeams.sort((a, b) => b.prob - a.prob)
-}
-
-function getAllTeamsForElimination(type: 'participation' | 'advancement') {
-  const sourceArray = type === 'participation' 
-    ? results.value?.elim_participation 
-    : results.value?.elim_advancers
-  
-  if (!sourceArray) {
-    return teams.value.map(team => ({
-      team_id: team.team_id,
-      team: team.name,
-      prob: 0
-    }))
-  }
-  
-  const allTeams = teams.value.map(team => {
-    const existingTeam = sourceArray.find(t => t.team_id === team.team_id)
-    return existingTeam || {
-      team_id: team.team_id,
-      team: team.name,
-      prob: 0
-    }
-  })
-  
-  return allTeams.sort((a, b) => b.prob - a.prob)
-}
-
-function getAllTeamsForChampionship() {
-  if (!results.value?.title_odds) {
-    return teams.value.map(team => ({
-      team_id: team.team_id,
-      team: team.name,
-      win_prob: 0
-    }))
-  }
-  
-  const allTeams = teams.value.map(team => {
-    const existingTeam = results.value!.title_odds.find(t => t.team_id === team.team_id)
-    return existingTeam || {
-      team_id: team.team_id,
-      team: team.name,
-      win_prob: 0
-    }
-  })
-  
-  return allTeams.sort((a, b) => b.win_prob - a.win_prob)
-}
-
-// Methods
-async function loadData() {
-  try {
-    const [teamsData, probMatrixData] = await Promise.all([
-      loadTeams(),
-      loadProbMatrix()
-    ])
-    teams.value = teamsData
-    probMatrix.value = probMatrixData
-    customSeedOrder.value = [...teamsData] // Initialize custom seed order
-    isDataLoaded.value = true
-  } catch (error) {
-    console.error('Error loading data:', error)
-  }
-}
-
-function updateConfig() {
-  // Determine seeding type and pairing style
-  if (seedingType.value === 'random') {
-    config.value.random_seeding = true
-    config.value.pairing_style = '1v16' // Default for random
-  } else if (seedingType.value === 'random_1v16') {
-    config.value.random_seeding = true
-    config.value.pairing_style = '1v16'
-  } else if (seedingType.value === 'random_adjacent') {
-    config.value.random_seeding = true
-    config.value.pairing_style = 'adjacent'
-  } else if (seedingType.value === 'seeded_1v16') {
-    config.value.random_seeding = false
-    config.value.pairing_style = '1v16'
-    config.value.seed_order = teams.value.map(t => t.team_id)
-  } else if (seedingType.value === 'seeded_adjacent') {
-    config.value.random_seeding = false
-    config.value.pairing_style = 'adjacent'
-    config.value.seed_order = teams.value.map(t => t.team_id)
-  } else if (seedingType.value === 'custom') {
-    config.value.random_seeding = false
-    config.value.pairing_style = customPairingStyle.value
-    config.value.seed_order = customSeedOrder.value.map(t => t.team_id)
-  }
-}
 
 function dragStart(event: DragEvent, index: number) {
   draggedIndex.value = index
@@ -583,82 +415,117 @@ function dragStart(event: DragEvent, index: number) {
 
 function drop(event: DragEvent, index: number) {
   event.preventDefault()
-  if (draggedIndex.value === null) return
-  
-  const items = [...customSeedOrder.value]
-  const draggedItem = items[draggedIndex.value]
-  items.splice(draggedIndex.value, 1)
-  items.splice(index, 0, draggedItem)
-  
-  customSeedOrder.value = items
+  if (draggedIndex.value === null || draggedIndex.value === index) return
+
+  const teams = [...store.customSeedOrder]
+  const draggedTeam = teams[draggedIndex.value]
+  teams.splice(draggedIndex.value, 1)
+  teams.splice(index, 0, draggedTeam)
+  store.customSeedOrder = teams
   draggedIndex.value = null
 }
 
+async function loadData() {
+  if (store.isDataLoaded) return
+
+  try {
+    const [teamsData, probMatrixData] = await Promise.all([
+      loadTeams(),
+      loadProbMatrix()
+    ])
+    store.setData(teamsData, probMatrixData)
+  } catch (error) {
+    console.error('Error loading data:', error)
+  }
+}
+
 async function runSimulation() {
-  if (!isDataLoaded.value) return
+  if (!store.isDataLoaded) return
   
-  isRunning.value = true
-  results.value = null
-  singleRun.value = null
+  console.log('Starting simulation, setting isRunning to true')
+  store.isRunning = true
+  store.results = null
+  store.singleRun = null
   
   // Initialize progress tracking
-  progress.value = {
+  store.progress = {
     current: 0,
-    total: config.value.num_simulations,
+    total: store.config.num_simulations,
     stage: 'Initializing...',
     isMonteCarlo: true
   }
   
+  console.log('Progress initialized:', store.progress)
+  console.log('isRunning value:', store.isRunning)
+  
+  // Ensure UI updates before starting simulation
+  await nextTick()
+  
+  // Add a small delay to make the loading state visible
+  await new Promise(resolve => setTimeout(resolve, 100))
+  
   try {
-    updateConfig()
-    const simulator = new TournamentSimulator(teams.value, probMatrix.value, rngSeed.value)
+    store.updateConfig()
+    const simulator = new TournamentSimulator(store.teams, store.probMatrix, store.rngSeed)
     
     // Create a progress callback
-    const onProgress = (current: number, stage: string) => {
-      progress.value.current = current
-      progress.value.stage = stage
+    const onProgress = async (current: number, stage: string) => {
+      console.log('Progress callback:', current, stage)
+      store.progress.current = current
+      store.progress.stage = stage
+      // Ensure UI updates on each progress callback
+      await nextTick()
     }
     
-    const [titleOdds, logs, stats] = simulator.monteCarlo(config.value, onProgress)
-    results.value = stats
+    const [titleOdds, logs, stats] = await simulator.monteCarlo(store.config, onProgress)
+    store.results = stats
   } catch (error) {
     console.error('Simulation error:', error)
   } finally {
-    isRunning.value = false
+    console.log('Simulation complete, setting isRunning to false')
+    store.isRunning = false
   }
 }
 
 async function runSingleSimulation() {
-  if (!isDataLoaded.value) return
+  if (!store.isDataLoaded) return
   
-  isRunning.value = true
-  results.value = null
-  singleRun.value = null
+  store.isRunning = true
+  store.results = null
+  store.singleRun = null
   
   // Initialize progress tracking
-  progress.value = {
+  store.progress = {
     current: 0,
     total: 1,
     stage: 'Initializing...',
     isMonteCarlo: false
   }
   
+  // Ensure UI updates before starting simulation
+  await nextTick()
+  
+  // Add a small delay to make the loading state visible
+  await new Promise(resolve => setTimeout(resolve, 100))
+  
   try {
-    updateConfig()
-    const simulator = new TournamentSimulator(teams.value, probMatrix.value, rngSeed.value)
+    store.updateConfig()
+    const simulator = new TournamentSimulator(store.teams, store.probMatrix, store.rngSeed)
     
     // Create a progress callback
-    const onProgress = (current: number, stage: string) => {
-      progress.value.current = current
-      progress.value.stage = stage
+    const onProgress = async (current: number, stage: string) => {
+      store.progress.current = current
+      store.progress.stage = stage
+      // Ensure UI updates on each progress callback
+      await nextTick()
     }
     
-    const [champion, runLog] = simulator.simulateOnce(config.value, onProgress)
-    singleRun.value = runLog
+    const [champion, runLog] = await simulator.simulateOnce(store.config, onProgress)
+    store.singleRun = runLog
   } catch (error) {
     console.error('Single simulation error:', error)
   } finally {
-    isRunning.value = false
+    store.isRunning = false
   }
 }
 

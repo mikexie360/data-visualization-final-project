@@ -1,121 +1,237 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Team, ProbMatrix, TournamentRun, SimulationStats } from '../types'
-import { TournamentSimulator } from '../services/tournamentSimulator'
-import { loadTeams, loadProbMatrix } from '../services/loadData'
+import { TournamentSimulator, type SimulationConfig, type ProgressCallback } from '../services/tournamentSimulator'
+import type { Team, ProbMatrix, SimulationStats, TournamentRun } from '../types'
 
 export const useSimStore = defineStore('sim', () => {
-  // State
+  // Data loading state
+  const isDataLoaded = ref(false)
   const teams = ref<Team[]>([])
   const probMatrix = ref<ProbMatrix>({})
+
+  // Simulation state
+  const isRunning = ref(false)
+  const results = ref<SimulationStats | null>(null)
+  const singleRun = ref<TournamentRun | null>(null)
+
+  // Progress tracking
+  const progress = ref({
+    current: 0,
+    total: 0,
+    stage: '',
+    isMonteCarlo: false
+  })
+
+  // Configuration state
+  const config = ref<SimulationConfig>({
+    random_seeding: true,
+    pairing_style: '1v16',
+    num_simulations: 100,
+    verbose: false
+  })
+
+  const seedingType = ref('random')
+  const rngSeed = ref(42)
+  const customSeedOrder = ref<Team[]>([])
+  const customPairingStyle = ref<'1v16' | 'adjacent'>('1v16')
+  const draggedIndex = ref<number | null>(null)
+
+  // Simulator instance
   const simulator = ref<TournamentSimulator | null>(null)
-  const currentRun = ref<TournamentRun | null>(null)
-  const simulationStats = ref<SimulationStats | null>(null)
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
 
   // Computed
-  const isReady = computed(() => simulator.value !== null)
-  const hasCurrentRun = computed(() => currentRun.value !== null)
-  const hasStats = computed(() => simulationStats.value !== null)
+  const playoffStages = computed(() => ({
+    'UB_QF': { name: 'Upper Bracket Quarterfinals' },
+    'UB_SF': { name: 'Upper Bracket Semifinals' },
+    'UB_Final': { name: 'Upper Bracket Final' },
+    'LB_R1': { name: 'Lower Bracket Round 1' },
+    'LB_R2': { name: 'Lower Bracket Round 2' },
+    'LB_QF': { name: 'Lower Bracket Quarterfinal' },
+    'LB_Final': { name: 'Lower Bracket Final' },
+    'GF': { name: 'Grand Final' }
+  }))
 
   // Actions
-  async function initialize() {
-    try {
-      isLoading.value = true
-      error.value = null
-      
-      const [teamsData, matrixData] = await Promise.all([
-        loadTeams(),
-        loadProbMatrix()
-      ])
-      
-      teams.value = teamsData
-      probMatrix.value = matrixData
-      simulator.value = new TournamentSimulator(teamsData, matrixData)
-      
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Failed to initialize simulator'
-    } finally {
-      isLoading.value = false
+  function setData(teamsData: Team[], probMatrixData: ProbMatrix) {
+    teams.value = teamsData
+    probMatrix.value = probMatrixData
+    isDataLoaded.value = true
+  }
+
+  function updateConfig() {
+    if (!teams.value.length) return
+
+    let randomSeeding = true
+    let pairingStyle: '1v16' | 'adjacent' = '1v16'
+
+    if (seedingType.value === 'seeded_1v16') {
+      randomSeeding = false
+      pairingStyle = '1v16'
+    } else if (seedingType.value === 'seeded_adjacent') {
+      randomSeeding = false
+      pairingStyle = 'adjacent'
+    } else if (seedingType.value === 'random_1v16') {
+      randomSeeding = true
+      pairingStyle = '1v16'
+    } else if (seedingType.value === 'random_adjacent') {
+      randomSeeding = true
+      pairingStyle = 'adjacent'
+    } else if (seedingType.value === 'custom') {
+      randomSeeding = false
+      pairingStyle = customPairingStyle.value as '1v16' | 'adjacent'
+    }
+
+    config.value = {
+      random_seeding: randomSeeding,
+      pairing_style: pairingStyle,
+      num_simulations: config.value.num_simulations,
+      verbose: false,
+      seed_order: seedingType.value === 'custom' ? customSeedOrder.value.map(t => t.team_id) : undefined
     }
   }
 
-  function simulateSingleRun(
-    randomSeeding: boolean = true,
-    pairingStyle: '1v16' | 'adjacent' = '1v16',
-    seedOrder?: number[]
-  ) {
+  async function simulateSingleRun(
+    config: SimulationConfig,
+    onProgress?: ProgressCallback
+  ): Promise<TournamentRun> {
     if (!simulator.value) {
-      throw new Error('Simulator not initialized')
+      simulator.value = new TournamentSimulator(teams.value, probMatrix.value, rngSeed.value)
     }
-
-    try {
-      currentRun.value = simulator.value.simulateOnce(randomSeeding, pairingStyle, seedOrder)
-      return currentRun.value
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Simulation failed'
-      throw err
-    }
+    const [champion, runLog] = await simulator.value.simulateOnce(config, onProgress)
+    singleRun.value = runLog
+    return runLog
   }
 
-  function runMonteCarlo(
-    N: number = 100,
-    randomSeeding: boolean = true,
-    pairingStyle: '1v16' | 'adjacent' = '1v16',
-    seedOrder?: number[]
-  ) {
+  async function runMonteCarlo(
+    config: SimulationConfig,
+    onProgress?: ProgressCallback
+  ): Promise<SimulationStats> {
     if (!simulator.value) {
-      throw new Error('Simulator not initialized')
+      simulator.value = new TournamentSimulator(teams.value, probMatrix.value, rngSeed.value)
     }
+    const [titleOdds, logs, stats] = await simulator.value.monteCarlo(config, onProgress)
+    results.value = stats
+    return stats
+  }
 
-    try {
-      isLoading.value = true
-      error.value = null
-      
-      simulationStats.value = simulator.value.monteCarlo(N, randomSeeding, pairingStyle, seedOrder)
-      return simulationStats.value
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Monte Carlo simulation failed'
-      throw err
-    } finally {
-      isLoading.value = false
+  // Helper methods for displaying all teams
+  function getAllTeamsForBucket(bucketKey: string) {
+    if (!results.value?.swiss_final_probs[bucketKey]) {
+      return teams.value.map(team => ({
+        team_id: team.team_id,
+        team: team.name,
+        prob: 0
+      }))
     }
+    
+    const bucketTeams = results.value.swiss_final_probs[bucketKey]
+    const allTeams = teams.value.map(team => {
+      const existingTeam = bucketTeams.find(t => t.team_id === team.team_id)
+      return existingTeam || {
+        team_id: team.team_id,
+        team: team.name,
+        prob: 0
+      }
+    })
+    
+    return allTeams.sort((a, b) => b.prob - a.prob)
   }
 
-  function clearCurrentRun() {
-    currentRun.value = null
+  function getAllTeamsForStage(stageKey: string) {
+    if (!results.value?.stage_probs[stageKey]) {
+      return teams.value.map(team => ({
+        team_id: team.team_id,
+        team: team.name,
+        prob: 0
+      }))
+    }
+    
+    const stageTeams = results.value.stage_probs[stageKey]
+    const allTeams = teams.value.map(team => {
+      const existingTeam = stageTeams.find(t => t.team_id === team.team_id)
+      return existingTeam || {
+        team_id: team.team_id,
+        team: team.name,
+        prob: 0
+      }
+    })
+    
+    return allTeams.sort((a, b) => b.prob - a.prob)
   }
 
-  function clearStats() {
-    simulationStats.value = null
+  function getAllTeamsForElimination(type: 'participation' | 'advancement') {
+    const sourceArray = type === 'participation' 
+      ? results.value?.elim_participation 
+      : results.value?.elim_advancers
+    
+    if (!sourceArray) {
+      return teams.value.map(team => ({
+        team_id: team.team_id,
+        team: team.name,
+        prob: 0
+      }))
+    }
+    
+    const allTeams = teams.value.map(team => {
+      const existingTeam = sourceArray.find(t => t.team_id === team.team_id)
+      return existingTeam || {
+        team_id: team.team_id,
+        team: team.name,
+        prob: 0
+      }
+    })
+    
+    return allTeams.sort((a, b) => b.prob - a.prob)
   }
 
-  function clearError() {
-    error.value = null
+  function getAllTeamsForChampionship() {
+    if (!results.value?.title_odds) {
+      return teams.value.map(team => ({
+        team_id: team.team_id,
+        team: team.name,
+        win_prob: 0
+      }))
+    }
+    
+    const allTeams = teams.value.map(team => {
+      const existingTeam = results.value!.title_odds.find(t => t.team_id === team.team_id)
+      return existingTeam || {
+        team_id: team.team_id,
+        team: team.name,
+        win_prob: 0
+      }
+    })
+    
+    return allTeams.sort((a, b) => b.win_prob - a.win_prob)
   }
 
   return {
     // State
+    isDataLoaded,
     teams,
     probMatrix,
-    simulator,
-    currentRun,
-    simulationStats,
-    isLoading,
-    error,
-    
-    // Computed
-    isReady,
-    hasCurrentRun,
-    hasStats,
+    isRunning,
+    results,
+    singleRun,
+    progress,
+    config,
+    seedingType,
+    rngSeed,
+    customSeedOrder,
+    customPairingStyle,
+    draggedIndex,
+    playoffStages,
     
     // Actions
-    initialize,
+    setData,
+    updateConfig,
     simulateSingleRun,
     runMonteCarlo,
-    clearCurrentRun,
-    clearStats,
-    clearError
+    
+    // Helper methods
+    getAllTeamsForBucket,
+    getAllTeamsForStage,
+    getAllTeamsForElimination,
+    getAllTeamsForChampionship
   }
 })

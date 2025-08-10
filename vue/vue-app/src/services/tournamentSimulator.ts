@@ -142,7 +142,7 @@ export class TournamentSimulator {
 
   private pA(aId: number, bId: number): number {
     if (aId === bId) return 0.5
-    return this.probMatrix[aId.toString()]?.[bId.toString()] ?? 0.5
+    return this.probMatrix[aId]?.[bId] ?? 0.5
   }
 
   private playGame(aId: number, bId: number): [boolean, number] {
@@ -532,7 +532,7 @@ export class TournamentSimulator {
     return [champion, log]
   }
 
-  public simulateOnce(config: SimulationConfig, onProgress?: ProgressCallback): [number, TournamentRun] {
+  public async simulateOnce(config: SimulationConfig, onProgress?: ProgressCallback): Promise<[number, TournamentRun]> {
     const teamIds = this.teams.map(t => t.team_id)
     const runLog: TournamentRun = {
       teams: this.teams.map(t => ({ id: t.team_id, name: t.name })),
@@ -569,7 +569,7 @@ export class TournamentSimulator {
     return [champion, runLog]
   }
 
-  public monteCarlo(config: SimulationConfig, onProgress?: ProgressCallback): [Array<{ team_id: number; team: string; win_prob: number }>, TournamentRun[], SimulationStats] {
+  public async monteCarlo(config: SimulationConfig, onProgress?: ProgressCallback): Promise<[Array<{ team_id: number; team: string; win_prob: number }>, TournamentRun[], SimulationStats]> {
     const { num_simulations } = config
     const champs: number[] = []
     const logs: TournamentRun[] = []
@@ -592,7 +592,7 @@ export class TournamentSimulator {
 
     for (let i = 0; i < num_simulations; i++) {
       onProgress?.(i + 1, `Tournament ${i + 1}/${num_simulations}`)
-      const [champ, runLog] = this.simulateOnce(config, (current, stage) => {
+      const [champ, runLog] = await this.simulateOnce(config, (current, stage) => {
         onProgress?.(i + 1, `Tournament ${i + 1}/${num_simulations} - ${stage}`)
       })
       champs.push(champ)
@@ -600,6 +600,11 @@ export class TournamentSimulator {
 
       // Aggregate statistics
       this.aggregateFromRunLog(runLog, swissBucketCounts, swissFinalCounts, elimParticipation, elimAdvancers, stageCounts)
+      
+      // Add a small delay to make progress visible (only for larger simulations)
+      if (num_simulations > 10 && i % Math.max(1, Math.floor(num_simulations / 100)) === 0) {
+        await new Promise(resolve => setTimeout(resolve, 1))
+      }
     }
 
     // Build statistics
