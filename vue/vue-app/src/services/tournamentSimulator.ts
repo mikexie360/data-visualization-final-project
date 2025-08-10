@@ -96,6 +96,8 @@ export interface SimulationConfig {
   verbose: boolean
 }
 
+export type ProgressCallback = (current: number, stage: string) => void
+
 // Custom RNG for reproducible results
 class CustomRNG {
   private seed: number
@@ -530,7 +532,7 @@ export class TournamentSimulator {
     return [champion, log]
   }
 
-  public simulateOnce(config: SimulationConfig): [number, TournamentRun] {
+  public simulateOnce(config: SimulationConfig, onProgress?: ProgressCallback): [number, TournamentRun] {
     const teamIds = this.teams.map(t => t.team_id)
     const runLog: TournamentRun = {
       teams: this.teams.map(t => ({ id: t.team_id, name: t.name })),
@@ -540,8 +542,10 @@ export class TournamentSimulator {
       champion: {} as any
     }
 
-    // Swiss
+    // Swiss Stage
+    onProgress?.(0, 'Swiss Stage - Round 1')
     const [records, opponents, swissLog] = this.swissGroupStage(teamIds, config)
+    onProgress?.(0, 'Swiss Stage - Ranking')
     const [order, rankLog] = this.swissRank(records, opponents)
     runLog.swiss = {
       rounds: swissLog.rounds,
@@ -550,19 +554,22 @@ export class TournamentSimulator {
       config: swissLog.config
     }
 
-    // Elimination
+    // Elimination Round
+    onProgress?.(0, 'Elimination Round')
     const [elimWinners, elimLog] = this.eliminationRound(order)
     runLog.elimination_round = elimLog
 
     // Playoffs
+    onProgress?.(0, 'Playoffs - Upper Bracket')
     const [champion, poLog] = this.simulatePlayoffs(order, elimWinners)
     runLog.playoffs = poLog
     runLog.champion = { id: champion, name: this.idToName.get(champion)! }
 
+    onProgress?.(1, 'Complete')
     return [champion, runLog]
   }
 
-  public monteCarlo(config: SimulationConfig): [Array<{ team_id: number; team: string; win_prob: number }>, TournamentRun[], SimulationStats] {
+  public monteCarlo(config: SimulationConfig, onProgress?: ProgressCallback): [Array<{ team_id: number; team: string; win_prob: number }>, TournamentRun[], SimulationStats] {
     const { num_simulations } = config
     const champs: number[] = []
     const logs: TournamentRun[] = []
@@ -584,7 +591,10 @@ export class TournamentSimulator {
     }
 
     for (let i = 0; i < num_simulations; i++) {
-      const [champ, runLog] = this.simulateOnce(config)
+      onProgress?.(i + 1, `Tournament ${i + 1}/${num_simulations}`)
+      const [champ, runLog] = this.simulateOnce(config, (current, stage) => {
+        onProgress?.(i + 1, `Tournament ${i + 1}/${num_simulations} - ${stage}`)
+      })
       champs.push(champ)
       logs.push(runLog)
 

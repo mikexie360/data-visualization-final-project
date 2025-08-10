@@ -29,9 +29,45 @@
             :disabled="isRunning"
           >
             <option value="random">Random</option>
-            <option value="seeded">Seeded (1v16)</option>
-            <option value="adjacent">Seeded (Adjacent)</option>
+            <option value="random_1v16">Random (1v16)</option>
+            <option value="random_adjacent">Random (Adjacent)</option>
+            <option value="seeded_1v16">Seeded (1v16)</option>
+            <option value="seeded_adjacent">Seeded (Adjacent)</option>
+            <option value="custom">Custom Seeds</option>
           </select>
+        </div>
+
+        <div v-if="seedingType === 'custom'" class="config-item">
+          <label for="custom-pairing">Custom Seeds Pairing Style:</label>
+          <select 
+            id="custom-pairing"
+            v-model="customPairingStyle" 
+            :disabled="isRunning"
+          >
+            <option value="1v16">1v16 (Strongest vs Weakest)</option>
+            <option value="adjacent">Adjacent (Similar Strength)</option>
+          </select>
+        </div>
+
+        <div v-if="seedingType === 'custom'" class="config-item">
+          <label>Custom Team Seeds (Drag to reorder):</label>
+          <div class="custom-seeds">
+            <div class="custom-seeds-header">
+              {{ customPairingStyle === '1v16' ? '1v16 Pairing: Strongest vs Weakest teams' : 'Adjacent Pairing: Similar strength teams' }}
+            </div>
+            <div 
+              v-for="(team, index) in customSeedOrder" 
+              :key="team.team_id"
+              class="seed-item"
+              draggable="true"
+              @dragstart="dragStart($event, index)"
+              @dragover.prevent
+              @drop="drop($event, index)"
+            >
+              <span class="seed-number">{{ index + 1 }}</span>
+              <span class="team-name">{{ team.name }}</span>
+            </div>
+          </div>
         </div>
 
         <div class="config-item">
@@ -63,34 +99,66 @@
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="!isDataLoaded" class="loading">
-      <div class="spinner"></div>
-      <p>Loading tournament data...</p>
-    </div>
+         <!-- Loading State -->
+     <div v-if="!isDataLoaded" class="loading">
+       <div class="spinner"></div>
+       <p>Loading tournament data...</p>
+     </div>
+
+     <!-- Simulation Progress -->
+     <div v-if="isRunning" class="simulation-progress">
+       <div class="progress-header">
+         <div class="spinner"></div>
+         <h3>{{ progress.isMonteCarlo ? 'Running Monte Carlo Simulation' : 'Running Single Tournament' }}</h3>
+       </div>
+       
+       <div class="progress-info">
+         <div class="progress-text">
+           <span class="current">{{ progress.current }}</span>
+           <span class="separator">/</span>
+           <span class="total">{{ progress.total }}</span>
+           <span class="label">tournaments</span>
+         </div>
+         
+         <div class="progress-bar-container">
+           <div class="progress-bar">
+             <div 
+               class="progress-fill" 
+               :style="{ width: progress.total > 0 ? `${(progress.current / progress.total) * 100}%` : '0%' }"
+             ></div>
+           </div>
+           <span class="progress-percentage">
+             {{ progress.total > 0 ? Math.round((progress.current / progress.total) * 100) : 0 }}%
+           </span>
+         </div>
+         
+         <div class="current-stage">
+           <span class="stage-label">Current Stage:</span>
+           <span class="stage-name">{{ progress.stage }}</span>
+         </div>
+       </div>
+     </div>
 
     <!-- Results -->
     <div v-if="results && !isRunning" class="results">
-      <!-- Title Odds -->
-      <div class="result-section">
-        <h2>🏆 Championship Win Probabilities</h2>
-        <div class="odds-table">
-          <div class="table-header">
-            <span>Rank</span>
-            <span>Team</span>
-            <span>Win Probability</span>
-          </div>
-          <div 
-            v-for="(team, index) in results.title_odds" 
-            :key="team.team_id"
-            class="table-row"
-          >
-            <span class="rank">{{ index + 1 }}</span>
-            <span class="team-name">{{ team.team }}</span>
-            <span class="probability">{{ (team.win_prob * 100).toFixed(2) }}%</span>
-          </div>
-        </div>
-      </div>
+             <!-- Title Odds -->
+       <div class="result-section">
+         <h2>🏆 Championship Win Probabilities</h2>
+         <div class="odds-table scrollable-table">
+           <div class="table-header">
+             <span>Rank & Team</span>
+             <span>Win Probability</span>
+           </div>
+           <div 
+             v-for="(team, index) in getAllTeamsForChampionship()" 
+             :key="team.team_id"
+             class="table-row"
+           >
+             <span class="rank-team">{{ index + 1 }}. {{ team.team }}</span>
+             <span class="probability">{{ (team.win_prob * 100).toFixed(2) }}%</span>
+           </div>
+         </div>
+       </div>
 
       <!-- Swiss Stage Probabilities -->
       <div class="result-section">
@@ -102,13 +170,13 @@
             class="bucket-section"
           >
             <h3>Final Record: {{ bucketKey }}</h3>
-            <div class="odds-table">
+            <div class="odds-table scrollable-table">
               <div class="table-header">
                 <span>Team</span>
                 <span>Reach Probability</span>
               </div>
               <div 
-                v-for="team in bucket.slice(0, 5)" 
+                v-for="team in getAllTeamsForBucket(bucketKey)" 
                 :key="team.team_id"
                 class="table-row"
               >
@@ -125,13 +193,13 @@
         <h2>⚔️ Elimination Round Probabilities</h2>
         <div class="elim-section">
           <h3>Participation (Seeds 4-13)</h3>
-          <div class="odds-table">
+          <div class="odds-table scrollable-table">
             <div class="table-header">
               <span>Team</span>
               <span>Participation Rate</span>
             </div>
             <div 
-              v-for="team in results.elim_participation.slice(0, 8)" 
+              v-for="team in getAllTeamsForElimination('participation')" 
               :key="team.team_id"
               class="table-row"
             >
@@ -141,13 +209,13 @@
           </div>
 
           <h3>Advancement to Playoffs</h3>
-          <div class="odds-table">
+          <div class="odds-table scrollable-table">
             <div class="table-header">
               <span>Team</span>
               <span>Advancement Rate</span>
             </div>
             <div 
-              v-for="team in results.elim_advancers.slice(0, 8)" 
+              v-for="team in getAllTeamsForElimination('advancement')" 
               :key="team.team_id"
               class="table-row"
             >
@@ -168,13 +236,13 @@
             class="stage-section"
           >
             <h3>{{ stage.name }}</h3>
-            <div class="odds-table">
+            <div class="odds-table scrollable-table">
               <div class="table-header">
                 <span>Team</span>
                 <span>Reach Probability</span>
               </div>
               <div 
-                v-for="team in (results.stage_probs[stageKey] as Array<{team_id: number; team: string; prob: number}>)?.slice(0, 5) || []" 
+                v-for="team in getAllTeamsForStage(stageKey)" 
                 :key="team.team_id"
                 class="table-row"
               >
@@ -339,6 +407,14 @@ const probMatrix = ref<ProbMatrix>({})
 const results = ref<SimulationStats | null>(null)
 const singleRun = ref<TournamentRun | null>(null)
 
+// Progress tracking
+const progress = ref({
+  current: 0,
+  total: 0,
+  stage: '',
+  isMonteCarlo: false
+})
+
 // Configuration
 const config = ref<SimulationConfig>({
   random_seeding: true,
@@ -349,6 +425,9 @@ const config = ref<SimulationConfig>({
 
 const seedingType = ref('random')
 const rngSeed = ref(42)
+const customSeedOrder = ref<Team[]>([])
+const customPairingStyle = ref<'1v16' | 'adjacent'>('1v16')
+const draggedIndex = ref<number | null>(null)
 
 // Computed
 const playoffStages = computed(() => ({
@@ -363,6 +442,97 @@ const playoffStages = computed(() => ({
 }))
 
 // Methods
+function getAllTeamsForBucket(bucketKey: string) {
+  if (!results.value?.swiss_final_probs[bucketKey]) {
+    return teams.value.map(team => ({
+      team_id: team.team_id,
+      team: team.name,
+      prob: 0
+    }))
+  }
+  
+  const bucketTeams = results.value.swiss_final_probs[bucketKey]
+  const allTeams = teams.value.map(team => {
+    const existingTeam = bucketTeams.find(t => t.team_id === team.team_id)
+    return existingTeam || {
+      team_id: team.team_id,
+      team: team.name,
+      prob: 0
+    }
+  })
+  
+  return allTeams.sort((a, b) => b.prob - a.prob)
+}
+
+function getAllTeamsForStage(stageKey: string) {
+  if (!results.value?.stage_probs[stageKey]) {
+    return teams.value.map(team => ({
+      team_id: team.team_id,
+      team: team.name,
+      prob: 0
+    }))
+  }
+  
+  const stageTeams = results.value.stage_probs[stageKey]
+  const allTeams = teams.value.map(team => {
+    const existingTeam = stageTeams.find(t => t.team_id === team.team_id)
+    return existingTeam || {
+      team_id: team.team_id,
+      team: team.name,
+      prob: 0
+    }
+  })
+  
+  return allTeams.sort((a, b) => b.prob - a.prob)
+}
+
+function getAllTeamsForElimination(type: 'participation' | 'advancement') {
+  const sourceArray = type === 'participation' 
+    ? results.value?.elim_participation 
+    : results.value?.elim_advancers
+  
+  if (!sourceArray) {
+    return teams.value.map(team => ({
+      team_id: team.team_id,
+      team: team.name,
+      prob: 0
+    }))
+  }
+  
+  const allTeams = teams.value.map(team => {
+    const existingTeam = sourceArray.find(t => t.team_id === team.team_id)
+    return existingTeam || {
+      team_id: team.team_id,
+      team: team.name,
+      prob: 0
+    }
+  })
+  
+  return allTeams.sort((a, b) => b.prob - a.prob)
+}
+
+function getAllTeamsForChampionship() {
+  if (!results.value?.title_odds) {
+    return teams.value.map(team => ({
+      team_id: team.team_id,
+      team: team.name,
+      win_prob: 0
+    }))
+  }
+  
+  const allTeams = teams.value.map(team => {
+    const existingTeam = results.value!.title_odds.find(t => t.team_id === team.team_id)
+    return existingTeam || {
+      team_id: team.team_id,
+      team: team.name,
+      win_prob: 0
+    }
+  })
+  
+  return allTeams.sort((a, b) => b.win_prob - a.win_prob)
+}
+
+// Methods
 async function loadData() {
   try {
     const [teamsData, probMatrixData] = await Promise.all([
@@ -371,6 +541,7 @@ async function loadData() {
     ])
     teams.value = teamsData
     probMatrix.value = probMatrixData
+    customSeedOrder.value = [...teamsData] // Initialize custom seed order
     isDataLoaded.value = true
   } catch (error) {
     console.error('Error loading data:', error)
@@ -378,9 +549,49 @@ async function loadData() {
 }
 
 function updateConfig() {
-  config.value.random_seeding = seedingType.value === 'random'
-  config.value.pairing_style = seedingType.value === 'adjacent' ? 'adjacent' : '1v16'
-  config.value.seed_order = seedingType.value !== 'random' ? teams.value.map(t => t.team_id) : undefined
+  // Determine seeding type and pairing style
+  if (seedingType.value === 'random') {
+    config.value.random_seeding = true
+    config.value.pairing_style = '1v16' // Default for random
+  } else if (seedingType.value === 'random_1v16') {
+    config.value.random_seeding = true
+    config.value.pairing_style = '1v16'
+  } else if (seedingType.value === 'random_adjacent') {
+    config.value.random_seeding = true
+    config.value.pairing_style = 'adjacent'
+  } else if (seedingType.value === 'seeded_1v16') {
+    config.value.random_seeding = false
+    config.value.pairing_style = '1v16'
+    config.value.seed_order = teams.value.map(t => t.team_id)
+  } else if (seedingType.value === 'seeded_adjacent') {
+    config.value.random_seeding = false
+    config.value.pairing_style = 'adjacent'
+    config.value.seed_order = teams.value.map(t => t.team_id)
+  } else if (seedingType.value === 'custom') {
+    config.value.random_seeding = false
+    config.value.pairing_style = customPairingStyle.value
+    config.value.seed_order = customSeedOrder.value.map(t => t.team_id)
+  }
+}
+
+function dragStart(event: DragEvent, index: number) {
+  draggedIndex.value = index
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+  }
+}
+
+function drop(event: DragEvent, index: number) {
+  event.preventDefault()
+  if (draggedIndex.value === null) return
+  
+  const items = [...customSeedOrder.value]
+  const draggedItem = items[draggedIndex.value]
+  items.splice(draggedIndex.value, 1)
+  items.splice(index, 0, draggedItem)
+  
+  customSeedOrder.value = items
+  draggedIndex.value = null
 }
 
 async function runSimulation() {
@@ -390,10 +601,25 @@ async function runSimulation() {
   results.value = null
   singleRun.value = null
   
+  // Initialize progress tracking
+  progress.value = {
+    current: 0,
+    total: config.value.num_simulations,
+    stage: 'Initializing...',
+    isMonteCarlo: true
+  }
+  
   try {
     updateConfig()
     const simulator = new TournamentSimulator(teams.value, probMatrix.value, rngSeed.value)
-    const [titleOdds, logs, stats] = simulator.monteCarlo(config.value)
+    
+    // Create a progress callback
+    const onProgress = (current: number, stage: string) => {
+      progress.value.current = current
+      progress.value.stage = stage
+    }
+    
+    const [titleOdds, logs, stats] = simulator.monteCarlo(config.value, onProgress)
     results.value = stats
   } catch (error) {
     console.error('Simulation error:', error)
@@ -409,10 +635,25 @@ async function runSingleSimulation() {
   results.value = null
   singleRun.value = null
   
+  // Initialize progress tracking
+  progress.value = {
+    current: 0,
+    total: 1,
+    stage: 'Initializing...',
+    isMonteCarlo: false
+  }
+  
   try {
     updateConfig()
     const simulator = new TournamentSimulator(teams.value, probMatrix.value, rngSeed.value)
-    const [champion, runLog] = simulator.simulateOnce(config.value)
+    
+    // Create a progress callback
+    const onProgress = (current: number, stage: string) => {
+      progress.value.current = current
+      progress.value.stage = stage
+    }
+    
+    const [champion, runLog] = simulator.simulateOnce(config.value, onProgress)
     singleRun.value = runLog
   } catch (error) {
     console.error('Single simulation error:', error)
@@ -495,6 +736,64 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
+.custom-seeds {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: white;
+}
+
+.custom-seeds-header {
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.seed-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: grab;
+  transition: background-color 0.2s ease;
+}
+
+.seed-item:hover {
+  background-color: #f9fafb;
+}
+
+.seed-item:last-child {
+  border-bottom: none;
+}
+
+.seed-item:active {
+  cursor: grabbing;
+}
+
+.seed-number {
+  background: #3b82f6;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.seed-item .team-name {
+  font-weight: 500;
+  color: #1f2937;
+}
+
 .config-actions {
   display: flex;
   gap: 15px;
@@ -551,6 +850,111 @@ onMounted(() => {
   margin: 0 auto 20px;
 }
 
+.simulation-progress {
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.progress-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.3em;
+}
+
+.progress-info {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.progress-text {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+  color: #374151;
+}
+
+.progress-text .current {
+  font-weight: 700;
+  color: #3b82f6;
+  font-size: 1.5em;
+}
+
+.progress-text .separator {
+  margin: 0 8px;
+  color: #6b7280;
+}
+
+.progress-text .total {
+  font-weight: 600;
+  color: #374151;
+}
+
+.progress-text .label {
+  margin-left: 8px;
+  color: #6b7280;
+}
+
+.progress-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+.progress-percentage {
+  font-weight: 600;
+  color: #3b82f6;
+  min-width: 40px;
+  text-align: right;
+}
+
+.current-stage {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.stage-label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.stage-name {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -584,6 +988,29 @@ onMounted(() => {
   overflow: hidden;
 }
 
+.scrollable-table {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.scrollable-table::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable-table::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.scrollable-table::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.scrollable-table::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
 .table-header {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -613,6 +1040,11 @@ onMounted(() => {
 .rank {
   font-weight: 600;
   color: #6b7280;
+}
+
+.rank-team {
+  font-weight: 500;
+  color: #1f2937;
 }
 
 .team-name {
