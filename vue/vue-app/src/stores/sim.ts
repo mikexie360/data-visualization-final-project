@@ -70,13 +70,22 @@ export const useSimStore = defineStore('sim', () => {
 
     let randomSeeding = true
     let pairingStyle: '1v16' | 'adjacent' = '1v16'
+    let seedOrder: number[] | undefined = undefined
 
     if (seedingType.value === 'seeded_1v16') {
       randomSeeding = false
       pairingStyle = '1v16'
+      // Use teams sorted by their seed value for seeded options
+      seedOrder = [...teams.value]
+        .sort((a, b) => (a.seed ?? 0) - (b.seed ?? 0))
+        .map(t => t.team_id)
     } else if (seedingType.value === 'seeded_adjacent') {
       randomSeeding = false
       pairingStyle = 'adjacent'
+      // Use teams sorted by their seed value for seeded options
+      seedOrder = [...teams.value]
+        .sort((a, b) => (a.seed ?? 0) - (b.seed ?? 0))
+        .map(t => t.team_id)
     } else if (seedingType.value === 'random_1v16') {
       randomSeeding = true
       pairingStyle = '1v16'
@@ -86,6 +95,7 @@ export const useSimStore = defineStore('sim', () => {
     } else if (seedingType.value === 'custom') {
       randomSeeding = false
       pairingStyle = customPairingStyle.value as '1v16' | 'adjacent'
+      seedOrder = customSeedOrder.value.map(t => t.team_id)
     }
 
     config.value = {
@@ -93,7 +103,7 @@ export const useSimStore = defineStore('sim', () => {
       pairing_style: pairingStyle,
       num_simulations: config.value.num_simulations,
       verbose: false,
-      seed_order: seedingType.value === 'custom' ? customSeedOrder.value.map(t => t.team_id) : undefined
+      seed_order: seedOrder
     }
   }
 
