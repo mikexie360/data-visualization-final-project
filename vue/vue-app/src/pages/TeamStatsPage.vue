@@ -2,42 +2,42 @@
   <div class="team-stats-page">
     <h1>Team Statistics</h1>
     
-    <div v-if="loading" class="loading">
+    <div v-if="store.loading" class="loading">
       <div class="spinner"></div>
       <p>Loading team data...</p>
     </div>
     
-    <div v-else-if="error" class="error">
-      <p>Error loading team data: {{ error }}</p>
+    <div v-else-if="store.error" class="error">
+      <p>Error loading team data: {{ store.error }}</p>
     </div>
     
     <div v-else>
-             <!-- Filters and Search Section -->
-       <div class="filters-section" :class="{ collapsed: filtersCollapsed }">
+                    <!-- Filters and Search Section -->
+       <div class="filters-section" :class="{ collapsed: store.filtersCollapsed }">
          <div class="filters-header">
            <div class="filters-title">
              <h3>Filters & Search</h3>
-             <span class="results-count">({{ filteredTeams.length }}/{{ allTeams.length }})</span>
+             <span class="results-count">({{ store.filteredTeams.length }}/{{ store.allTeams.length }})</span>
            </div>
            <div class="filters-actions">
-             <button @click="resetFilters" class="reset-btn">
+             <button @click="store.resetFilters" class="reset-btn">
                <i class="pi pi-refresh"></i>
                <span class="btn-text">Reset</span>
              </button>
-             <button @click="toggleFilters" class="toggle-btn">
-               <i :class="filtersCollapsed ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"></i>
+             <button @click="store.toggleFilters" class="toggle-btn">
+               <i :class="store.filtersCollapsed ? 'pi pi-chevron-down' : 'pi pi-chevron-up'"></i>
              </button>
            </div>
-                  </div>
+         </div>
          
          <!-- Collapsible Filter Content -->
-         <div class="filters-content" :class="{ hidden: filtersCollapsed }">
+         <div class="filters-content" :class="{ hidden: store.filtersCollapsed }">
            <div class="filters-grid">
              <!-- Search Bar -->
              <div class="filter-group">
                <label>Search Teams:</label>
                <input 
-                 v-model="searchQuery" 
+                 v-model="store.searchQuery" 
                  type="text" 
                  placeholder="Search by team name..."
                  class="search-input"
@@ -51,7 +51,7 @@
                  <label class="checkbox-label">
                    <input 
                      type="checkbox" 
-                     v-model="filters.invitationTypes" 
+                     v-model="store.filters.invitationTypes" 
                      value="direct_invite"
                    />
                    Direct Invite
@@ -59,7 +59,7 @@
                  <label class="checkbox-label">
                    <input 
                      type="checkbox" 
-                     v-model="filters.invitationTypes" 
+                     v-model="store.filters.invitationTypes" 
                      value="regional_qualifier"
                    />
                    Regional Qualifier
@@ -69,21 +69,21 @@
              
              <!-- Rating Range Filter -->
              <div class="filter-group">
-               <label>Rating: {{ filters.ratingRange[0] }} - {{ filters.ratingRange[1] }}</label>
+               <label>Rating: {{ store.filters.ratingRange[0] }} - {{ store.filters.ratingRange[1] }}</label>
                <div class="range-slider">
                  <input 
                    type="range" 
-                   v-model="filters.ratingRange[0]" 
-                   :min="ratingBounds.min" 
-                   :max="ratingBounds.max" 
+                   v-model="store.filters.ratingRange[0]" 
+                   :min="store.ratingBounds.min" 
+                   :max="store.ratingBounds.max" 
                    step="0.01"
                    class="range-input"
                  />
                  <input 
                    type="range" 
-                   v-model="filters.ratingRange[1]" 
-                   :min="ratingBounds.min" 
-                   :max="ratingBounds.max" 
+                   v-model="store.filters.ratingRange[1]" 
+                   :min="store.ratingBounds.min" 
+                   :max="store.ratingBounds.max" 
                    step="0.01"
                    class="range-input"
                  />
@@ -92,21 +92,21 @@
              
              <!-- Wins Range Filter -->
              <div class="filter-group">
-               <label>Wins: {{ filters.winsRange[0] }} - {{ filters.winsRange[1] }}</label>
+               <label>Wins: {{ store.filters.winsRange[0] }} - {{ store.filters.winsRange[1] }}</label>
                <div class="range-slider">
                  <input 
                    type="range" 
-                   v-model="filters.winsRange[0]" 
-                   :min="winsBounds.min" 
-                   :max="winsBounds.max" 
+                   v-model="store.filters.winsRange[0]" 
+                   :min="store.winsBounds.min" 
+                   :max="store.winsBounds.max" 
                    step="1"
                    class="range-input"
                  />
                  <input 
                    type="range" 
-                   v-model="filters.winsRange[1]" 
-                   :min="winsBounds.min" 
-                   :max="winsBounds.max" 
+                   v-model="store.filters.winsRange[1]" 
+                   :min="store.winsBounds.min" 
+                   :max="store.winsBounds.max" 
                    step="1"
                    class="range-input"
                  />
@@ -115,21 +115,21 @@
              
              <!-- Losses Range Filter -->
              <div class="filter-group">
-               <label>Losses: {{ filters.lossesRange[0] }} - {{ filters.lossesRange[1] }}</label>
+               <label>Losses: {{ store.filters.lossesRange[0] }} - {{ store.filters.lossesRange[1] }}</label>
                <div class="range-slider">
                  <input 
                    type="range" 
-                   v-model="filters.lossesRange[0]" 
-                   :min="lossesBounds.min" 
-                   :max="lossesBounds.max" 
+                   v-model="store.filters.lossesRange[0]" 
+                   :min="store.lossesBounds.min" 
+                   :max="store.lossesBounds.max" 
                    step="1"
                    class="range-input"
                  />
                  <input 
                    type="range" 
-                   v-model="filters.lossesRange[1]" 
-                   :min="lossesBounds.min" 
-                   :max="lossesBounds.max" 
+                   v-model="store.filters.lossesRange[1]" 
+                   :min="store.lossesBounds.min" 
+                   :max="store.lossesBounds.max" 
                    step="1"
                    class="range-input"
                  />
@@ -138,11 +138,11 @@
              
              <!-- Win Rate Range Filter -->
              <div class="filter-group">
-               <label>Win Rate: {{ filters.winRateRange[0] }}% - {{ filters.winRateRange[1] }}%</label>
+               <label>Win Rate: {{ store.filters.winRateRange[0] }}% - {{ store.filters.winRateRange[1] }}%</label>
                <div class="range-slider">
                  <input 
                    type="range" 
-                   v-model="filters.winRateRange[0]" 
+                   v-model="store.filters.winRateRange[0]" 
                    :min="0" 
                    :max="100" 
                    step="0.1"
@@ -150,7 +150,7 @@
                  />
                  <input 
                    type="range" 
-                   v-model="filters.winRateRange[1]" 
+                   v-model="store.filters.winRateRange[1]" 
                    :min="0" 
                    :max="100" 
                    step="0.1"
@@ -163,7 +163,7 @@
              <div class="filter-group">
                <label>Sort By:</label>
                <div class="sort-controls">
-                 <select v-model="sortBy" class="sort-select">
+                 <select v-model="store.sortBy" class="sort-select">
                    <option value="name">Team Name</option>
                    <option value="rating">Rating</option>
                    <option value="wins">Wins</option>
@@ -171,8 +171,8 @@
                    <option value="winRate">Win Rate</option>
                    <option value="invitationType">Invitation Type</option>
                  </select>
-                 <button @click="toggleSortOrder" class="sort-btn">
-                   <i :class="sortOrder === 'asc' ? 'pi pi-sort-up' : 'pi pi-sort-down'"></i>
+                 <button @click="store.toggleSortOrder" class="sort-btn">
+                   <i :class="store.sortOrder === 'asc' ? 'pi pi-sort-up' : 'pi pi-sort-down'"></i>
                  </button>
                </div>
              </div>
@@ -180,13 +180,13 @@
          </div>
       </div>
       
-      <!-- Teams Grid -->
-      <div class="teams-grid">
-        <div 
-          v-for="team in filteredTeams" 
-          :key="team.team_id" 
-          class="team-card"
-        >
+             <!-- Teams Grid -->
+       <div class="teams-grid">
+         <div 
+           v-for="team in store.filteredTeams" 
+           :key="team.team_id" 
+           class="team-card"
+         >
           <div class="team-header">
             <img 
               v-if="team.logo_url" 
@@ -197,9 +197,9 @@
             />
             <div class="team-name-container">
               <TeamName :team-name="team.name" />
-              <div class="invitation-type">
-                {{ formatInvitationType(team.invitation_type) }}
-              </div>
+                             <div class="invitation-type">
+                 {{ store.formatInvitationType(team.invitation_type) }}
+               </div>
             </div>
           </div>
           
@@ -224,14 +224,14 @@
               <span class="stat-label">Losses:</span>
               <span class="stat-value losses">{{ team.losses }}</span>
             </div>
-            <div class="stat-row">
-              <span class="stat-label">Win Rate:</span>
-              <span class="stat-value">{{ calculateWinRate(team.wins, team.losses) }}%</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-label">Type:</span>
-              <span class="stat-value invitation-type">{{ formatInvitationType(team.invitation_type) }}</span>
-            </div>
+                         <div class="stat-row">
+               <span class="stat-label">Win Rate:</span>
+               <span class="stat-value">{{ store.calculateWinRate(team.wins, team.losses) }}%</span>
+             </div>
+             <div class="stat-row">
+               <span class="stat-label">Type:</span>
+               <span class="stat-value invitation-type">{{ store.formatInvitationType(team.invitation_type) }}</span>
+             </div>
           </div>
         </div>
       </div>
@@ -240,170 +240,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import TeamName from '@/components/TeamName.vue'
 import { getTeamDetailedImageFilename } from '@/utils/teamUtils'
+import { useTeamStatsStore } from '@/stores/teamStats'
 
-interface TeamInfo {
-  team_id: number
-  name: string
-  rating: number
-  wins: number
-  losses: number
-  logo_url: string
-  invitation_type: string
-}
-
-const allTeams = ref<TeamInfo[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
-
-// Search and filter state
-const searchQuery = ref('')
-const sortBy = ref('name')
-const sortOrder = ref<'asc' | 'desc'>('asc')
-const filtersCollapsed = ref(false)
-
-const filters = ref({
-  invitationTypes: ['direct_invite', 'regional_qualifier'],
-  ratingRange: [1100, 1600],
-  winsRange: [0, 2000],
-  lossesRange: [0, 2000],
-  winRateRange: [0, 100]
-})
-
-// Computed bounds for range sliders
-const ratingBounds = computed(() => {
-  if (allTeams.value.length === 0) return { min: 0, max: 2000 }
-  const ratings = allTeams.value.map(t => t.rating)
-  return { min: Math.floor(Math.min(...ratings)), max: Math.ceil(Math.max(...ratings)) }
-})
-
-const winsBounds = computed(() => {
-  if (allTeams.value.length === 0) return { min: 0, max: 2000 }
-  const wins = allTeams.value.map(t => t.wins)
-  return { min: Math.min(...wins), max: Math.max(...wins) }
-})
-
-const lossesBounds = computed(() => {
-  if (allTeams.value.length === 0) return { min: 0, max: 2000 }
-  const losses = allTeams.value.map(t => t.losses)
-  return { min: Math.min(...losses), max: Math.max(...losses) }
-})
-
-// Fuzzy search function
-function fuzzySearch(text: string, query: string): boolean {
-  if (!query) return true
-  const normalizedText = text.toLowerCase()
-  const normalizedQuery = query.toLowerCase()
-  
-  let queryIndex = 0
-  for (let i = 0; i < normalizedText.length && queryIndex < normalizedQuery.length; i++) {
-    if (normalizedText[i] === normalizedQuery[queryIndex]) {
-      queryIndex++
-    }
-  }
-  return queryIndex === normalizedQuery.length
-}
-
-// Filter and sort teams
-const filteredTeams = computed(() => {
-  let filtered = allTeams.value.filter(team => {
-    // Search filter
-    if (!fuzzySearch(team.name, searchQuery.value)) return false
-    
-    // Invitation type filter
-    if (!filters.value.invitationTypes.includes(team.invitation_type)) return false
-    
-    // Rating filter
-    if (team.rating < filters.value.ratingRange[0] || team.rating > filters.value.ratingRange[1]) return false
-    
-    // Wins filter
-    if (team.wins < filters.value.winsRange[0] || team.wins > filters.value.winsRange[1]) return false
-    
-    // Losses filter
-    if (team.losses < filters.value.lossesRange[0] || team.losses > filters.value.lossesRange[1]) return false
-    
-    // Win rate filter
-    const winRate = parseFloat(calculateWinRate(team.wins, team.losses))
-    if (winRate < filters.value.winRateRange[0] || winRate > filters.value.winRateRange[1]) return false
-    
-    return true
-  })
-  
-  // Sort teams
-  filtered.sort((a, b) => {
-    let aValue: any
-    let bValue: any
-    
-    switch (sortBy.value) {
-      case 'name':
-        aValue = a.name.toLowerCase()
-        bValue = b.name.toLowerCase()
-        break
-      case 'rating':
-        aValue = a.rating
-        bValue = b.rating
-        break
-      case 'wins':
-        aValue = a.wins
-        bValue = b.wins
-        break
-      case 'losses':
-        aValue = a.losses
-        bValue = b.losses
-        break
-      case 'winRate':
-        aValue = parseFloat(calculateWinRate(a.wins, a.losses))
-        bValue = parseFloat(calculateWinRate(b.wins, b.losses))
-        break
-      case 'invitationType':
-        aValue = a.invitation_type
-        bValue = b.invitation_type
-        break
-      default:
-        aValue = a.name.toLowerCase()
-        bValue = b.name.toLowerCase()
-    }
-    
-    if (aValue < bValue) return sortOrder.value === 'asc' ? -1 : 1
-    if (aValue > bValue) return sortOrder.value === 'asc' ? 1 : -1
-    return 0
-  })
-  
-  return filtered
-})
-
-function calculateWinRate(wins: number, losses: number): string {
-  const total = wins + losses
-  if (total === 0) return '0.00'
-  return ((wins / total) * 100).toFixed(2)
-}
-
-function formatInvitationType(type: string): string {
-  return type === 'direct_invite' ? 'Direct Invite' : 'Regional Qualifier'
-}
-
-function resetFilters() {
-  searchQuery.value = ''
-  filters.value = {
-    invitationTypes: ['direct_invite', 'regional_qualifier'],
-    ratingRange: [ratingBounds.value.min, ratingBounds.value.max],
-    winsRange: [winsBounds.value.min, winsBounds.value.max],
-    lossesRange: [lossesBounds.value.min, lossesBounds.value.max],
-    winRateRange: [0, 100]
-  }
-  sortBy.value = 'name'
-  sortOrder.value = 'asc'
-}
-
-function toggleSortOrder() {
-  sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
-}
-
-function toggleFilters() {
-  filtersCollapsed.value = !filtersCollapsed.value
-}
+const store = useTeamStatsStore()
 
 function handleLogoError(event: Event) {
   const img = event.target as HTMLImageElement
@@ -415,34 +257,11 @@ function handleImageError(event: Event) {
   img.src = '/images/default_detailed.png'
 }
 
-async function loadTeamData() {
-  try {
-    const response = await fetch('/team_info.json')
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-    const data = await response.json()
-    allTeams.value = data.teams
-    
-    // Initialize filter ranges with actual data bounds
-    if (data.teams.length > 0) {
-      const ratings = data.teams.map((t: TeamInfo) => t.rating)
-      const wins = data.teams.map((t: TeamInfo) => t.wins)
-      const losses = data.teams.map((t: TeamInfo) => t.losses)
-      
-      filters.value.ratingRange = [Math.floor(Math.min(...ratings)), Math.ceil(Math.max(...ratings))]
-      filters.value.winsRange = [Math.min(...wins), Math.max(...wins)]
-      filters.value.lossesRange = [Math.min(...losses), Math.max(...losses)]
-    }
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Unknown error occurred'
-  } finally {
-    loading.value = false
-  }
-}
-
 onMounted(() => {
-  loadTeamData()
+  // Only load data if not already loaded
+  if (store.allTeams.length === 0) {
+    store.loadTeamData()
+  }
 })
 </script>
 
