@@ -25,11 +25,37 @@ const store = useHeatmapStore()
 const heatmapRef = ref<HTMLElement>()
 
 // D3 heatmap dimensions
-const margin = { top: 120, right: 50, bottom: 120, left: 120 }
-const width = 900
-const height = 700
+const margin = { top: 120, right: 120, bottom: 160, left: 120 }
+const width = 1200
+const height = 900
+const imageSize = 40 // Size for team images
 
 let svg: d3.Selection<SVGGElement, unknown, null, undefined> | null = null
+
+// Function to convert team name to SVG filename
+function getTeamImageFilename(teamName: string): string {
+  // Map team names to their corresponding SVG filenames
+  const nameMap: Record<string, string> = {
+    'Team Liquid': 'Team_Liquid.png',
+    'PARIVISION': 'PARIVISION.png',
+    'BetBoom Team': 'BetBoom_Team.png',
+    'Team Tidebound': 'Team_Tidebound.png',
+    'Gaimin Gladiators': 'Gaimin_Gladiators.png',
+    'Team Spirit': 'Team_Spirit.png',
+    'Team Falcons': 'Team_Falcons.png',
+    'Tundra Esports': 'Tundra_Esports.png',
+    'Natus Vincere': 'Natus_Vincere.png',
+    'Nigma Galaxy': 'Nigma_Galaxy.png',
+    'Aurora Gaming': 'Aurora_Gaming.png',
+    'Xtreme Gaming': 'Xtreme_Gaming.png',
+    'Team Nemesis': 'Team_Nemesis.png',
+    'BOOM Esports': 'BOOM_Esports.png',
+    'Wildcard': 'Wildcard.png',
+    'HEROIC': 'HEROIC.png'
+  }
+  
+  return nameMap[teamName] || `${teamName.replace(/\s+/g, '_')}.png`
+}
 
 function loadData() {
   // Check if data is already loaded in store
@@ -258,7 +284,7 @@ function createHeatmap() {
   const legendWidth = 400
   const legendHeight = 20
   const legendX = (width - legendWidth) / 2
-  const legendY = height + 30
+  const legendY = height + 80
 
   const legendScale = d3.scaleLinear()
     .domain([0, 1])
@@ -317,6 +343,52 @@ for (let i = 0; i <= stops; i++) {
     .style('font-weight', 'bold')
     .style('fill', '#000')
     .text('P(A beats B)')
+
+  // Add team images on the right side (Team A)
+  svg.selectAll('.team-a-image')
+    .data(store.teams)
+    .enter()
+    .append('image')
+    .attr('class', 'team-a-image')
+    .attr('x', width + 20)
+    .attr('y', (d: any) => {
+      const teamAName = d.name
+      const wrappedName = teamAName
+      return (yScale(wrappedName) || 0) + yScale.bandwidth() / 2 - imageSize / 2
+    })
+    .attr('width', imageSize)
+    .attr('height', imageSize)
+    .attr('href', (d: any) => {
+      const filename = getTeamImageFilename(d.name)
+      return `/images/${filename}`
+    })
+    .on('error', function() {
+      // Hide image if it fails to load
+      d3.select(this).style('display', 'none')
+    })
+
+  // Add team images on the bottom side (Team B)
+  svg.selectAll('.team-b-image')
+    .data(store.teams)
+    .enter()
+    .append('image')
+    .attr('class', 'team-b-image')
+    .attr('x', (d: any) => {
+      const teamBName = d.name
+      const wrappedName = teamBName
+      return (xScale(wrappedName) || 0) + xScale.bandwidth() / 2 - imageSize / 2
+    })
+    .attr('y', height + 20)
+    .attr('width', imageSize)
+    .attr('height', imageSize)
+    .attr('href', (d: any) => {
+      const filename = getTeamImageFilename(d.name)
+      return `/images/${filename}`
+    })
+    .on('error', function() {
+      // Hide image if it fails to load
+      d3.select(this).style('display', 'none')
+    })
 }
 
 // Lifecycle
@@ -327,7 +399,7 @@ onMounted(() => {
 
 <style scoped>
 .heatmap-page {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -359,6 +431,9 @@ onMounted(() => {
   padding: 20px;
   background: white;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 100%;
+  overflow: auto;
 }
 
 .loading {
