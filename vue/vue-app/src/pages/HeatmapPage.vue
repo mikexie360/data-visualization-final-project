@@ -101,7 +101,7 @@ function createHeatmap() {
 
   const colorScale = d3.scaleSequential()
     .domain([0, 1])
-    .interpolator(d3.interpolateGreys)
+    .interpolator(d3.interpolateGreens)
     .clamp(true)
 
   // Create heatmap cells
@@ -186,7 +186,7 @@ function createHeatmap() {
     .attr('dominant-baseline', 'middle')
     .style('font-size', '10px')
     .style('font-weight', 'bold')
-    .style('fill', (d: any) => d.probability < 0.5 ? '#000' : '#fff')
+    .style('fill', (d: any) => d.probability < 0.5 ? '#fff' : '#fff')
     .text((d: any) => `${(d.probability * 100).toFixed(1)}%`)
 
   // Add X-axis (Team B) - on top
@@ -273,14 +273,21 @@ function createHeatmap() {
     .attr('class', 'legend')
     .attr('transform', `translate(${legendX},${legendY})`)
 
-  // Legend gradient
-  const defs = svg.append('defs')
-  const gradient = defs.append('linearGradient')
-    .attr('id', 'legend-gradient')
-    .attr('x1', '0%')
-    .attr('y1', '0%')
-    .attr('x2', '100%')
-    .attr('y2', '0%')
+// Legend gradient (use the same colorScale)
+const defs = svg.append('defs')
+const gradient = defs.append('linearGradient')
+  .attr('id', 'legend-gradient')
+  .attr('x1', '0%').attr('y1', '0%')
+  .attr('x2', '100%').attr('y2', '0%')
+
+// sample the scale so it blends smoothly
+const stops = 20
+for (let i = 0; i <= stops; i++) {
+  const t = i / stops
+  gradient.append('stop')
+    .attr('offset', `${t * 100}%`)
+    .attr('stop-color', colorScale(t)) // <— key change
+}
 
   gradient.append('stop')
     .attr('offset', '0%')

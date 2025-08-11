@@ -169,7 +169,7 @@
 
       <!-- Swiss Stage Probabilities -->
       <div class="result-section">
-        <h2>🇨🇭 Swiss Stage Reach Probabilities</h2>
+        <h2>🧀 Swiss Stage Reach Probabilities</h2>
         <div class="swiss-buckets">
           <div 
             v-for="(bucket, bucketKey) in store.results.swiss_final_probs" 

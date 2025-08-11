@@ -4,7 +4,7 @@
       <div class="nav-container">
         <div class="nav-brand">
           <i class="pi pi-sitemap"></i>
-          <span class="font-semibold">TI 2025 Visualization</span>
+          <span class="font-semibold">Dota 2 TI 2025 Visualization</span>
         </div>
         
         <div class="nav-links">
