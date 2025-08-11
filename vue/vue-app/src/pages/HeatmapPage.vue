@@ -57,6 +57,31 @@ function getTeamImageFilename(teamName: string): string {
   return nameMap[teamName] || `${teamName.replace(/\s+/g, '_')}.png`
 }
 
+// Function to get detailed image filename
+function getTeamDetailedImageFilename(teamName: string): string {
+  // Map team names to their corresponding detailed PNG filenames
+  const nameMap: Record<string, string> = {
+    'Team Liquid': 'Team_Liquid_detailed.png',
+    'PARIVISION': 'PARIVISION_detailed.png',
+    'BetBoom Team': 'BetBoom_Team_detailed.png',
+    'Team Tidebound': 'Team_Tidebound_detailed.png',
+    'Gaimin Gladiators': 'Gaimin_Gladiators_detailed.png',
+    'Team Spirit': 'Team_Spirit_detailed.png',
+    'Team Falcons': 'Team_Falcons_detailed.png',
+    'Tundra Esports': 'Tundra_Esports_detailed.png',
+    'Natus Vincere': 'Natus_Vincere_detailed.png',
+    'Nigma Galaxy': 'Nigma_Galaxy_detailed.png',
+    'Aurora Gaming': 'Aurora_Gaming_detailed.png',
+    'Xtreme Gaming': 'Xtreme_Gaming_detailed.png',
+    'Team Nemesis': 'Team_Nemesis_detailed.png',
+    'BOOM Esports': 'BOOM_Esports_detailed.png',
+    'Wildcard': 'Wildcard_detailed.png',
+    'HEROIC': 'HEROIC_detailed.png'
+  }
+  
+  return nameMap[teamName] || `${teamName.replace(/\s+/g, '_')}_detailed.png`
+}
+
 function loadData() {
   // Check if data is already loaded in store
   if (store.isReady) {
@@ -362,6 +387,54 @@ for (let i = 0; i <= stops; i++) {
       const filename = getTeamImageFilename(d.name)
       return `/images/${filename}`
     })
+    .style('cursor', 'pointer')
+    .on('mouseover', function(event, d: any) {
+      // Show detailed image tooltip
+      const tooltip = d3.select('body').append('div')
+        .attr('class', 'detailed-image-tooltip')
+        .style('position', 'absolute')
+        .style('background', 'white')
+        .style('border', '2px solid #333')
+        .style('border-radius', '8px')
+        .style('padding', '10px')
+        .style('box-shadow', '0 4px 8px rgba(0,0,0,0.3)')
+        .style('z-index', '1000')
+        .style('pointer-events', 'none')
+      
+      const detailedImage = tooltip.append('img')
+        .attr('src', `/images/${getTeamDetailedImageFilename(d.name)}`)
+        .style('width', '200px')
+        .style('height', 'auto')
+        .style('display', 'block')
+      
+      tooltip.append('div')
+        .style('text-align', 'center')
+        .style('margin-top', '5px')
+        .style('font-weight', 'bold')
+        .style('font-size', '12px')
+        .text(d.name)
+      
+      // Position tooltip
+      const tooltipWidth = 220
+      const tooltipHeight = 250
+      let left = event.pageX + 15
+      let top = event.pageY - tooltipHeight - 15
+      
+      // Adjust if tooltip would go off screen
+      if (left + tooltipWidth > window.innerWidth) {
+        left = event.pageX - tooltipWidth - 15
+      }
+      if (top < 0) {
+        top = event.pageY + 15
+      }
+      
+      tooltip
+        .style('left', left + 'px')
+        .style('top', top + 'px')
+    })
+    .on('mouseout', function() {
+      d3.selectAll('.detailed-image-tooltip').remove()
+    })
     .on('error', function() {
       // Hide image if it fails to load
       d3.select(this).style('display', 'none')
@@ -384,6 +457,54 @@ for (let i = 0; i <= stops; i++) {
     .attr('href', (d: any) => {
       const filename = getTeamImageFilename(d.name)
       return `/images/${filename}`
+    })
+    .style('cursor', 'pointer')
+    .on('mouseover', function(event, d: any) {
+      // Show detailed image tooltip
+      const tooltip = d3.select('body').append('div')
+        .attr('class', 'detailed-image-tooltip')
+        .style('position', 'absolute')
+        .style('background', 'white')
+        .style('border', '2px solid #333')
+        .style('border-radius', '8px')
+        .style('padding', '10px')
+        .style('box-shadow', '0 4px 8px rgba(0,0,0,0.3)')
+        .style('z-index', '1000')
+        .style('pointer-events', 'none')
+      
+      const detailedImage = tooltip.append('img')
+        .attr('src', `/images/${getTeamDetailedImageFilename(d.name)}`)
+        .style('width', '200px')
+        .style('height', 'auto')
+        .style('display', 'block')
+      
+      tooltip.append('div')
+        .style('text-align', 'center')
+        .style('margin-top', '5px')
+        .style('font-weight', 'bold')
+        .style('font-size', '12px')
+        .text(d.name)
+      
+      // Position tooltip
+      const tooltipWidth = 220
+      const tooltipHeight = 250
+      let left = event.pageX + 15
+      let top = event.pageY - tooltipHeight - 15
+      
+      // Adjust if tooltip would go off screen
+      if (left + tooltipWidth > window.innerWidth) {
+        left = event.pageX - tooltipWidth - 15
+      }
+      if (top < 0) {
+        top = event.pageY + 15
+      }
+      
+      tooltip
+        .style('left', left + 'px')
+        .style('top', top + 'px')
+    })
+    .on('mouseout', function() {
+      d3.selectAll('.detailed-image-tooltip').remove()
     })
     .on('error', function() {
       // Hide image if it fails to load
