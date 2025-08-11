@@ -72,7 +72,7 @@
               @drop="drop($event, index)"
             >
               <span class="seed-number">{{ index + 1 }}</span>
-              <span class="team-name">{{ team.name }}</span>
+              <TeamName :team-name="team.name" />
             </div>
           </div>
         </div>
@@ -161,7 +161,7 @@
              :key="team.team_id"
              class="table-row"
            >
-             <span class="rank-team">{{ index + 1 }}. {{ team.team }}</span>
+             <span class="rank-team">{{ index + 1 }}. <TeamName :team-name="team.team" /></span>
              <span class="probability">{{ (team.win_prob * 100).toFixed(2) }}%</span>
            </div>
          </div>
@@ -187,7 +187,7 @@
                 :key="team.team_id"
                 class="table-row"
               >
-                <span class="team-name">{{ team.team }}</span>
+                <TeamName :team-name="team.team" />
                 <span class="probability">{{ (team.prob * 100).toFixed(2) }}%</span>
               </div>
             </div>
@@ -210,7 +210,7 @@
               :key="team.team_id"
               class="table-row"
             >
-              <span class="team-name">{{ team.team }}</span>
+              <TeamName :team-name="team.team" />
               <span class="probability">{{ (team.prob * 100).toFixed(2) }}%</span>
             </div>
           </div>
@@ -226,7 +226,7 @@
               :key="team.team_id"
               class="table-row"
             >
-              <span class="team-name">{{ team.team }}</span>
+              <TeamName :team-name="team.team" />
               <span class="probability">{{ (team.prob * 100).toFixed(2) }}%</span>
             </div>
           </div>
@@ -253,7 +253,7 @@
                 :key="team.team_id"
                 class="table-row"
               >
-                <span class="team-name">{{ team.team }}</span>
+                <TeamName :team-name="team.team" />
                 <span class="probability">{{ (team.prob * 100).toFixed(2) }}%</span>
               </div>
             </div>
@@ -266,7 +266,7 @@
     <div v-if="store.singleRun && !store.isRunning" class="single-results">
       <h2>🎯 Single Tournament Run</h2>
       <div class="champion">
-        <h3>🏆 Champion: {{ store.singleRun.champion.name }}</h3>
+        <h3>🏆 Champion: <TeamName :team-name="store.singleRun.champion.name" /></h3>
       </div>
       
       <!-- Swiss Results -->
@@ -305,7 +305,9 @@
                     class="pairing"
                   >
                     <div class="match-result">
-                      <div class="team team-a">{{ store.singleRun.teams.find(t => t.id === pairing.A)?.name }}</div>
+                      <div class="team team-a">
+                  <TeamName :team-name="store.singleRun.teams.find(t => t.id === pairing.A)?.name || ''" />
+                </div>
                       <div class="score">
                         {{ round.matches.find(m => 
                           (m.A.id === pairing.A && m.B.id === pairing.B) || 
@@ -316,12 +318,14 @@
                           (m.A.id === pairing.B && m.B.id === pairing.A)
                         )?.final_score?.[1] || '0' }}
                       </div>
-                      <div class="team team-b">{{ store.singleRun.teams.find(t => t.id === pairing.B)?.name }}</div>
+                      <div class="team team-b">
+                  <TeamName :team-name="store.singleRun.teams.find(t => t.id === pairing.B)?.name || ''" />
+                </div>
                       <div class="winner">
-                        Winner: {{ round.matches.find(m => 
+                        Winner: <TeamName :team-name="round.matches.find(m => 
                           (m.A.id === pairing.A && m.B.id === pairing.B) || 
                           (m.A.id === pairing.B && m.B.id === pairing.A)
-                        )?.winner?.name || 'TBD' }}
+                        )?.winner?.name || 'TBD'" />
                       </div>
                     </div>
                   </div>
@@ -373,7 +377,7 @@
                    class="table-row"
                  >
                    <span class="rank">{{ team.overallRank }}</span>
-                   <span class="team-name">{{ team.name }}</span>
+                   <TeamName :team-name="team.name" />
                    <span class="buchholz">{{ team.buchholz.toFixed(2) }}</span>
                  </div>
                </div>
@@ -400,7 +404,7 @@
                 class="team-item"
               >
                 <span class="rank">#{{ index + 1 }}</span>
-                <span class="team-name">{{ store.singleRun.teams.find(t => t.id === teamId)?.name }}</span>
+                <TeamName :team-name="store.singleRun.teams.find(t => t.id === teamId)?.name || ''" />
                 <span class="record">{{ store.singleRun.swiss.records_final[teamId][0] }}-{{ store.singleRun.swiss.records_final[teamId][1] }}</span>
                 <span class="buchholz">{{ store.singleRun.swiss.rank.buchholz[teamId]?.toFixed(2) || '0.00' }}</span>
               </div>
@@ -417,7 +421,7 @@
                 class="team-item"
               >
                 <span class="rank">#{{ index + 4 }}</span>
-                <span class="team-name">{{ store.singleRun.teams.find(t => t.id === teamId)?.name }}</span>
+                <TeamName :team-name="store.singleRun.teams.find(t => t.id === teamId)?.name || ''" />
                 <span class="record">{{ store.singleRun.swiss.records_final[teamId][0] }}-{{ store.singleRun.swiss.records_final[teamId][1] }}</span>
                 <span class="buchholz">{{ store.singleRun.swiss.rank.buchholz[teamId]?.toFixed(2) || '0.00' }}</span>
               </div>
@@ -434,7 +438,7 @@
                 class="team-item"
               >
                 <span class="rank">#{{ index + 14 }}</span>
-                <span class="team-name">{{ store.singleRun.teams.find(t => t.id === teamId)?.name }}</span>
+                <TeamName :team-name="store.singleRun.teams.find(t => t.id === teamId)?.name || ''" />
                 <span class="record">{{ store.singleRun.swiss.records_final[teamId][0] }}-{{ store.singleRun.swiss.records_final[teamId][1] }}</span>
                 <span class="buchholz">{{ store.singleRun.swiss.rank.buchholz[teamId]?.toFixed(2) || '0.00' }}</span>
               </div>
@@ -461,12 +465,10 @@
                 <h4>Match {{ index + 1 }}</h4>
               </div>
               <div class="match-content">
-                <div class="team team-a">{{ match.A.name }}</div>
+                <div class="team"><TeamName :team-name="match.A.name" /></div>
                 <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
-                <div class="team team-b">{{ match.B.name }}</div>
-                <div class="winner">
-                  <strong>Winner: {{ match.winner.name }}</strong>
-                </div>
+                <div class="team"><TeamName :team-name="match.B.name" /></div>
+                <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
               </div>
             </div>
           </div>
@@ -479,7 +481,7 @@
                 :key="winnerId"
                 class="advancing-team"
               >
-                {{ store.singleRun.teams.find(t => t.id === winnerId)?.name }}
+                <TeamName :team-name="store.singleRun.teams.find(t => t.id === winnerId)?.name || ''" />
               </div>
             </div>
           </div>
@@ -500,10 +502,10 @@
                   :key="match.label"
                   class="match"
                 >
-                  <div class="team">{{ match.A.name }}</div>
+                  <div class="team"><TeamName :team-name="match.A.name" /></div>
                   <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
-                  <div class="team">{{ match.B.name }}</div>
-                  <div class="winner">Winner: {{ match.winner.name }}</div>
+                  <div class="team"><TeamName :team-name="match.B.name" /></div>
+                  <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
                 </div>
               </div>
               <div class="round">
@@ -513,19 +515,19 @@
                   :key="match.label"
                   class="match"
                 >
-                  <div class="team">{{ match.A.name }}</div>
+                  <div class="team"><TeamName :team-name="match.A.name" /></div>
                   <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
-                  <div class="team">{{ match.B.name }}</div>
-                  <div class="winner">Winner: {{ match.winner.name }}</div>
+                  <div class="team"><TeamName :team-name="match.B.name" /></div>
+                  <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
                 </div>
               </div>
               <div class="round">
                 <h5>Final</h5>
                 <div class="match">
-                  <div class="team">{{ store.singleRun.playoffs.UB.Final.A.name }}</div>
+                  <div class="team"><TeamName :team-name="store.singleRun.playoffs.UB.Final.A.name" /></div>
                   <div class="score">{{ store.singleRun.playoffs.UB.Final.final_score[0] }}-{{ store.singleRun.playoffs.UB.Final.final_score[1] }}</div>
-                  <div class="team">{{ store.singleRun.playoffs.UB.Final.B.name }}</div>
-                  <div class="winner">Winner: {{ store.singleRun.playoffs.UB.Final.winner.name }}</div>
+                  <div class="team"><TeamName :team-name="store.singleRun.playoffs.UB.Final.B.name" /></div>
+                  <div class="winner">Winner: <TeamName :team-name="store.singleRun.playoffs.UB.Final.winner.name" /></div>
                 </div>
               </div>
             </div>
@@ -541,10 +543,10 @@
                   :key="match.label"
                   class="match"
                 >
-                  <div class="team">{{ match.A.name }}</div>
+                  <div class="team"><TeamName :team-name="match.A.name" /></div>
                   <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
-                  <div class="team">{{ match.B.name }}</div>
-                  <div class="winner">Winner: {{ match.winner.name }}</div>
+                  <div class="team"><TeamName :team-name="match.B.name" /></div>
+                  <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
                 </div>
               </div>
               <div class="round">
@@ -554,28 +556,28 @@
                   :key="match.label"
                   class="match"
                 >
-                  <div class="team">{{ match.A.name }}</div>
+                  <div class="team"><TeamName :team-name="match.A.name" /></div>
                   <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
-                  <div class="team">{{ match.B.name }}</div>
-                  <div class="winner">Winner: {{ match.winner.name }}</div>
+                  <div class="team"><TeamName :team-name="match.B.name" /></div>
+                  <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
                 </div>
               </div>
               <div class="round">
                 <h5>Quarterfinal</h5>
                 <div class="match">
-                  <div class="team">{{ store.singleRun.playoffs.LB.QF.A.name }}</div>
+                  <div class="team"><TeamName :team-name="store.singleRun.playoffs.LB.QF.A.name" /></div>
                   <div class="score">{{ store.singleRun.playoffs.LB.QF.final_score[0] }}-{{ store.singleRun.playoffs.LB.QF.final_score[1] }}</div>
-                  <div class="team">{{ store.singleRun.playoffs.LB.QF.B.name }}</div>
-                  <div class="winner">Winner: {{ store.singleRun.playoffs.LB.QF.winner.name }}</div>
+                  <div class="team"><TeamName :team-name="store.singleRun.playoffs.LB.QF.B.name" /></div>
+                  <div class="winner">Winner: <TeamName :team-name="store.singleRun.playoffs.LB.QF.winner.name" /></div>
                 </div>
               </div>
               <div class="round">
                 <h5>Final</h5>
                 <div class="match">
-                  <div class="team">{{ store.singleRun.playoffs.LB.Final.A.name }}</div>
+                  <div class="team"><TeamName :team-name="store.singleRun.playoffs.LB.Final.A.name" /></div>
                   <div class="score">{{ store.singleRun.playoffs.LB.Final.final_score[0] }}-{{ store.singleRun.playoffs.LB.Final.final_score[1] }}</div>
-                  <div class="team">{{ store.singleRun.playoffs.LB.Final.B.name }}</div>
-                  <div class="winner">Winner: {{ store.singleRun.playoffs.LB.Final.winner.name }}</div>
+                  <div class="team"><TeamName :team-name="store.singleRun.playoffs.LB.Final.B.name" /></div>
+                  <div class="winner">Winner: <TeamName :team-name="store.singleRun.playoffs.LB.Final.winner.name" /></div>
                 </div>
               </div>
             </div>
@@ -585,10 +587,10 @@
         <div class="grand-final">
           <h4>Grand Final</h4>
           <div class="match">
-            <div class="team">{{ store.singleRun.playoffs.GF.A.name }}</div>
+            <div class="team"><TeamName :team-name="store.singleRun.playoffs.GF.A.name" /></div>
             <div class="score">{{ store.singleRun.playoffs.GF.final_score[0] }}-{{ store.singleRun.playoffs.GF.final_score[1] }}</div>
-            <div class="team">{{ store.singleRun.playoffs.GF.B.name }}</div>
-            <div class="winner">🏆 Champion: {{ store.singleRun.playoffs.GF.winner.name }}</div>
+            <div class="team"><TeamName :team-name="store.singleRun.playoffs.GF.B.name" /></div>
+            <div class="winner">🏆 Champion: <TeamName :team-name="store.singleRun.playoffs.GF.winner.name" /></div>
           </div>
         </div>
       </div>
@@ -602,6 +604,7 @@ import { useSimStore } from '@/stores/sim'
 import { loadTeams, loadProbMatrix } from '@/services/loadData'
 import { TournamentSimulator } from '@/services/tournamentSimulator'
 import type { Team, ProbMatrix } from '@/types'
+import TeamName from '@/components/TeamName.vue'
 
 const store = useSimStore()
 
