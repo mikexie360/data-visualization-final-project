@@ -161,7 +161,7 @@ onMounted(() => {
 
 .teams-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
   gap: 30px;
   margin-top: 20px;
 }
@@ -170,9 +170,10 @@ onMounted(() => {
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 25px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   border: 1px solid #e1e5e9;
+  min-height: 500px;
 }
 
 .team-card:hover {
@@ -209,14 +210,18 @@ onMounted(() => {
 .team-image {
   margin-bottom: 20px;
   text-align: center;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .team-image img {
   width: 100%;
   height: auto;
   border-radius: 8px;
-  max-height: 200px;
-  object-fit: cover;
+  max-height: 300px;
+  object-fit: contain;
 }
 
 .team-stats {
@@ -263,6 +268,11 @@ onMounted(() => {
   
   .team-card {
     padding: 15px;
+    min-height: 450px;
+  }
+  
+  .team-image {
+    min-height: 280px;
   }
   
   .team-stats-page h1 {
