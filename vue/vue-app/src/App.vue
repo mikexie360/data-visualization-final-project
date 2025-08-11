@@ -25,6 +25,15 @@
             <i class="pi pi-play"></i>
             <span>Simulator</span>
           </router-link>
+          
+          <router-link 
+            to="/teams" 
+            class="nav-link"
+            :class="{ active: $route.path === '/teams' }"
+          >
+            <i class="pi pi-users"></i>
+            <span>Team Stats</span>
+          </router-link>
         </div>
       </div>
     </nav>

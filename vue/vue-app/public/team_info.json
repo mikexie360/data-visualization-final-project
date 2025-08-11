@@ -1,0 +1,132 @@
+{
+  "teams": [
+    {
+      "team_id": 2163,
+      "name": "Team Liquid",
+      "rating": 1493.65,
+      "wins": 1623,
+      "losses": 1110,
+      "logo_url": "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/2163.png"
+    },
+    {
+      "team_id": 9572001,
+      "name": "PARIVISION",
+      "rating": 1559.36,
+      "wins": 179,
+      "losses": 91,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/2476508692281774105/EDE870E88FFD1C4E01DE40BF1B5E548D3459D046/"
+    },
+    {
+      "team_id": 8255888,
+      "name": "BetBoom Team",
+      "rating": 1547.12,
+      "wins": 502,
+      "losses": 405,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/9995426432403529725/51E13136D4CCC8C7D8062861541A1D13B8ED87E0/"
+    },
+    {
+      "team_id": 9640842,
+      "name": "Team Tidebound",
+      "rating": 1448.39,
+      "wins": 106,
+      "losses": 68,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/12094940740270677482/9AD05F0A80A562EE4A833375BF1783B52B3D4C30/"
+    },
+    {
+      "team_id": 8599101,
+      "name": "Gaimin Gladiators",
+      "rating": 1347.18,
+      "wins": 550,
+      "losses": 390,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/1850419664501191993/5DAAB68FB5604D29E1792A0F35E74B3FE3F3A026/"
+    },
+    {
+      "team_id": 7119388,
+      "name": "Team Spirit",
+      "rating": 1578.63,
+      "wins": 768,
+      "losses": 512,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/1839179120711951766/CD7E0885CB527334205CC7885E9C101B7BC17702/"
+    },
+    {
+      "team_id": 9247354,
+      "name": "Team Falcons",
+      "rating": 1427.28,
+      "wins": 395,
+      "losses": 197,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/2314350571781870059/2B5C9FE9BA0A2DC303A13261444532AA08352843/"
+    },
+    {
+      "team_id": 8291895,
+      "name": "Tundra Esports",
+      "rating": 1391.24,
+      "wins": 654,
+      "losses": 405,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/2031716132171967904/07B168B8063D9B22CDAD53AB421ECAF3D4B2E07E/"
+    },
+    {
+      "team_id": 36,
+      "name": "Natus Vincere",
+      "rating": 1344.55,
+      "wins": 1293,
+      "losses": 1089,
+      "logo_url": "https://steamcdn-a.akamaihd.net/apps/dota2/images/team_logos/36.png"
+    },
+    {
+      "team_id": 7554697,
+      "name": "Nigma Galaxy",
+      "rating": 1280.06,
+      "wins": 520,
+      "losses": 472,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/1827894588975105240/421C0D8318D71D5DD31FD08A7933AB622AE26590/"
+    },
+    {
+      "team_id": 9467224,
+      "name": "Aurora Gaming",
+      "rating": 1388.75,
+      "wins": 156,
+      "losses": 137,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/13052583756685508/22B0338D7E09FB2F021E5DB5BBEFFD170D5E5E1A/"
+    },
+    {
+      "team_id": 8261500,
+      "name": "Xtreme Gaming",
+      "rating": 1366.95,
+      "wins": 472,
+      "losses": 403,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/2402194226059610590/E3CF4B6C4B2CFB974A9B415141E4A37317AD4D80/"
+    },
+    {
+      "team_id": 9691969,
+      "name": "Team Nemesis",
+      "rating": 1255.24,
+      "wins": 38,
+      "losses": 18,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/16578975333650734744/040492179D9E0E83DA0559848D88CFC17A1EFCAC/"
+    },
+    {
+      "team_id": 7732977,
+      "name": "BOOM Esports",
+      "rating": 1210.1,
+      "wins": 664,
+      "losses": 479,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/2916748038054832/52C6F6228C73CDB6855C04B64FF21D061D2C15A9/"
+    },
+    {
+      "team_id": 8606828,
+      "name": "Wildcard",
+      "rating": 1119.7,
+      "wins": 151,
+      "losses": 154,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/5105424732072463157/803C73A4F9A4C089EFD08A2E572BDFADEB838260/"
+    },
+    {
+      "team_id": 9303484,
+      "name": "HEROIC",
+      "rating": 1241.0,
+      "wins": 231,
+      "losses": 199,
+      "logo_url": "https://cdn.steamusercontent.com/ugc/2471984170520125054/B066431AF4D322D300DD5180CEC8F6BA0E85A7F5/"
+    }
+  ]
+}
