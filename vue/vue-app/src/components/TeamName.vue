@@ -26,6 +26,7 @@ interface TeamInfo {
   wins: number
   losses: number
   logo_url: string
+  invitation_type: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -39,6 +40,10 @@ function calculateWinRate(wins: number, losses: number): string {
   const total = wins + losses
   if (total === 0) return '0.00'
   return ((wins / total) * 100).toFixed(2)
+}
+
+function formatInvitationType(type: string): string {
+  return type === 'direct_invite' ? 'Direct Invite' : 'Regional Qualifier'
 }
 
 async function loadTeamData() {
@@ -144,7 +149,8 @@ function showTooltip(event: MouseEvent) {
     { label: 'Rating', value: team.rating.toFixed(2) },
     { label: 'Wins', value: team.wins.toString(), color: '#28a745' },
     { label: 'Losses', value: team.losses.toString(), color: '#dc3545' },
-    { label: 'Win Rate', value: calculateWinRate(team.wins, team.losses) + '%' }
+    { label: 'Win Rate', value: calculateWinRate(team.wins, team.losses) + '%' },
+    { label: 'Type', value: formatInvitationType(team.invitation_type) }
   ]
   
   stats.forEach((stat, index) => {
