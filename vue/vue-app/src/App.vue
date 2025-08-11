@@ -137,7 +137,7 @@ function closeMobileMenu() {
   gap: 0.5rem;
   font-size: 1.1rem;
   color: #374151;
-  z-index: 1001;
+  z-index: 998;
 }
 
 /* Hamburger menu button */
@@ -151,7 +151,7 @@ function closeMobileMenu() {
   border: none;
   cursor: pointer;
   padding: 0;
-  z-index: 1001;
+  z-index: 1002;
 }
 
 .hamburger-menu span {
