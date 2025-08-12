@@ -478,106 +478,110 @@
       <!-- Playoff Bracket -->
       <div class="playoff-bracket">
         <h3>🏅 Playoff Bracket</h3>
-        <div class="bracket">
-          <div class="upper-bracket">
-            <h4>Upper Bracket</h4>
-            <div class="bracket-rounds">
-              <div class="round">
-                <h5>Quarterfinals</h5>
-                <div 
-                  v-for="match in store.singleRun.playoffs.UB.QF" 
-                  :key="match.label"
-                  class="match"
-                >
-                  <div class="team"><TeamName :team-name="match.A.name" /></div>
-                  <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
-                  <div class="team"><TeamName :team-name="match.B.name" /></div>
-                  <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
+        <div class="bracket-container">
+          <div class="bracket">
+            <!-- Upper Bracket -->
+            <div class="upper-bracket">
+              <h4>Upper Bracket</h4>
+              <div class="bracket-rounds">
+                <div class="round">
+                  <h5>Quarterfinals</h5>
+                  <div 
+                    v-for="match in store.singleRun.playoffs.UB.QF" 
+                    :key="match.label"
+                    class="match"
+                  >
+                    <div class="team"><TeamName :team-name="match.A.name" /></div>
+                    <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
+                    <div class="team"><TeamName :team-name="match.B.name" /></div>
+                    <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
+                  </div>
+                </div>
+                <div class="round">
+                  <h5>Semifinals</h5>
+                  <div 
+                    v-for="match in store.singleRun.playoffs.UB.SF" 
+                    :key="match.label"
+                    class="match"
+                  >
+                    <div class="team"><TeamName :team-name="match.A.name" /></div>
+                    <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
+                    <div class="team"><TeamName :team-name="match.B.name" /></div>
+                    <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
+                  </div>
+                </div>
+                <div class="round">
+                  <h5>Final</h5>
+                  <div class="match">
+                    <div class="team"><TeamName :team-name="store.singleRun.playoffs.UB.Final.A.name" /></div>
+                    <div class="score">{{ store.singleRun.playoffs.UB.Final.final_score[0] }}-{{ store.singleRun.playoffs.UB.Final.final_score[1] }}</div>
+                    <div class="team"><TeamName :team-name="store.singleRun.playoffs.UB.Final.B.name" /></div>
+                    <div class="winner">Winner: <TeamName :team-name="store.singleRun.playoffs.UB.Final.winner.name" /></div>
+                  </div>
                 </div>
               </div>
-              <div class="round">
-                <h5>Semifinals</h5>
-                <div 
-                  v-for="match in store.singleRun.playoffs.UB.SF" 
-                  :key="match.label"
-                  class="match"
-                >
-                  <div class="team"><TeamName :team-name="match.A.name" /></div>
-                  <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
-                  <div class="team"><TeamName :team-name="match.B.name" /></div>
-                  <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
+            </div>
+            
+            <!-- Lower Bracket -->
+            <div class="lower-bracket">
+              <h4>Lower Bracket</h4>
+              <div class="bracket-rounds">
+                <div class="round">
+                  <h5>Round 1</h5>
+                  <div 
+                    v-for="match in store.singleRun.playoffs.LB.R1" 
+                    :key="match.label"
+                    class="match"
+                  >
+                    <div class="team"><TeamName :team-name="match.A.name" /></div>
+                    <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
+                    <div class="team"><TeamName :team-name="match.B.name" /></div>
+                    <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
+                  </div>
                 </div>
-              </div>
-              <div class="round">
-                <h5>Final</h5>
-                <div class="match">
-                  <div class="team"><TeamName :team-name="store.singleRun.playoffs.UB.Final.A.name" /></div>
-                  <div class="score">{{ store.singleRun.playoffs.UB.Final.final_score[0] }}-{{ store.singleRun.playoffs.UB.Final.final_score[1] }}</div>
-                  <div class="team"><TeamName :team-name="store.singleRun.playoffs.UB.Final.B.name" /></div>
-                  <div class="winner">Winner: <TeamName :team-name="store.singleRun.playoffs.UB.Final.winner.name" /></div>
+                <div class="round">
+                  <h5>Round 2</h5>
+                  <div 
+                    v-for="match in store.singleRun.playoffs.LB.R2" 
+                    :key="match.label"
+                    class="match"
+                  >
+                    <div class="team"><TeamName :team-name="match.A.name" /></div>
+                    <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
+                    <div class="team"><TeamName :team-name="match.B.name" /></div>
+                    <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
+                  </div>
+                </div>
+                <div class="round">
+                  <h5>Quarterfinal</h5>
+                  <div class="match">
+                    <div class="team"><TeamName :team-name="store.singleRun.playoffs.LB.QF.A.name" /></div>
+                    <div class="score">{{ store.singleRun.playoffs.LB.QF.final_score[0] }}-{{ store.singleRun.playoffs.LB.QF.final_score[1] }}</div>
+                    <div class="team"><TeamName :team-name="store.singleRun.playoffs.LB.QF.B.name" /></div>
+                    <div class="winner">Winner: <TeamName :team-name="store.singleRun.playoffs.LB.QF.winner.name" /></div>
+                  </div>
+                </div>
+                <div class="round">
+                  <h5>Final</h5>
+                  <div class="match">
+                    <div class="team"><TeamName :team-name="store.singleRun.playoffs.LB.Final.A.name" /></div>
+                    <div class="score">{{ store.singleRun.playoffs.LB.Final.final_score[0] }}-{{ store.singleRun.playoffs.LB.Final.final_score[1] }}</div>
+                    <div class="team"><TeamName :team-name="store.singleRun.playoffs.LB.Final.B.name" /></div>
+                    <div class="winner">Winner: <TeamName :team-name="store.singleRun.playoffs.LB.Final.winner.name" /></div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           
-          <div class="lower-bracket">
-            <h4>Lower Bracket</h4>
-            <div class="bracket-rounds">
-              <div class="round">
-                <h5>Round 1</h5>
-                <div 
-                  v-for="match in store.singleRun.playoffs.LB.R1" 
-                  :key="match.label"
-                  class="match"
-                >
-                  <div class="team"><TeamName :team-name="match.A.name" /></div>
-                  <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
-                  <div class="team"><TeamName :team-name="match.B.name" /></div>
-                  <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
-                </div>
-              </div>
-              <div class="round">
-                <h5>Round 2</h5>
-                <div 
-                  v-for="match in store.singleRun.playoffs.LB.R2" 
-                  :key="match.label"
-                  class="match"
-                >
-                  <div class="team"><TeamName :team-name="match.A.name" /></div>
-                  <div class="score">{{ match.final_score[0] }}-{{ match.final_score[1] }}</div>
-                  <div class="team"><TeamName :team-name="match.B.name" /></div>
-                  <div class="winner">Winner: <TeamName :team-name="match.winner.name" /></div>
-                </div>
-              </div>
-              <div class="round">
-                <h5>Quarterfinal</h5>
-                <div class="match">
-                  <div class="team"><TeamName :team-name="store.singleRun.playoffs.LB.QF.A.name" /></div>
-                  <div class="score">{{ store.singleRun.playoffs.LB.QF.final_score[0] }}-{{ store.singleRun.playoffs.LB.QF.final_score[1] }}</div>
-                  <div class="team"><TeamName :team-name="store.singleRun.playoffs.LB.QF.B.name" /></div>
-                  <div class="winner">Winner: <TeamName :team-name="store.singleRun.playoffs.LB.QF.winner.name" /></div>
-                </div>
-              </div>
-              <div class="round">
-                <h5>Final</h5>
-                <div class="match">
-                  <div class="team"><TeamName :team-name="store.singleRun.playoffs.LB.Final.A.name" /></div>
-                  <div class="score">{{ store.singleRun.playoffs.LB.Final.final_score[0] }}-{{ store.singleRun.playoffs.LB.Final.final_score[1] }}</div>
-                  <div class="team"><TeamName :team-name="store.singleRun.playoffs.LB.Final.B.name" /></div>
-                  <div class="winner">Winner: <TeamName :team-name="store.singleRun.playoffs.LB.Final.winner.name" /></div>
-                </div>
-              </div>
+          <div class="grand-final">
+            <h4>Grand Final</h4>
+            <div class="match">
+              <div class="team"><TeamName :team-name="store.singleRun.playoffs.GF.A.name" /></div>
+              <div class="score">{{ store.singleRun.playoffs.GF.final_score[0] }}-{{ store.singleRun.playoffs.GF.final_score[1] }}</div>
+              <div class="team"><TeamName :team-name="store.singleRun.playoffs.GF.B.name" /></div>
+              <div class="winner">🏆 Champion: <TeamName :team-name="store.singleRun.playoffs.GF.winner.name" /></div>
             </div>
-          </div>
-        </div>
-        
-        <div class="grand-final">
-          <h4>Grand Final</h4>
-          <div class="match">
-            <div class="team"><TeamName :team-name="store.singleRun.playoffs.GF.A.name" /></div>
-            <div class="score">{{ store.singleRun.playoffs.GF.final_score[0] }}-{{ store.singleRun.playoffs.GF.final_score[1] }}</div>
-            <div class="team"><TeamName :team-name="store.singleRun.playoffs.GF.B.name" /></div>
-            <div class="winner">🏆 Champion: <TeamName :team-name="store.singleRun.playoffs.GF.winner.name" /></div>
           </div>
         </div>
       </div>
@@ -1628,11 +1632,17 @@ onMounted(() => {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+.bracket-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .bracket {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 30px;
   margin-bottom: 30px;
+  min-width: max-content;
 }
 
 .upper-bracket,
@@ -1668,14 +1678,50 @@ onMounted(() => {
 
 .bracket-rounds {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  flex-direction: row;
+  gap: 30px;
+  min-width: max-content;
+}
+
+.round {
+  min-width: 280px;
+  position: relative;
 }
 
 .round h5 {
   margin: 0 0 10px 0;
   color: #374151;
   font-size: 1em;
+  text-align: center;
+  padding: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  border-bottom: 2px solid #d1d5db;
+}
+
+/* Add connecting lines between rounds */
+.round:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -15px;
+  width: 30px;
+  height: 2px;
+  background: #d1d5db;
+  z-index: 1;
+}
+
+.round:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -15px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid #d1d5db;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  z-index: 2;
 }
 
 .match {
@@ -1876,6 +1922,45 @@ onMounted(() => {
   min-width: 60px;
 }
 
+/* Horizontal Playoff Bracket Styles */
+.round {
+  min-width: 280px;
+  position: relative;
+}
+
+.round h5 {
+  text-align: center;
+  padding: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  border-bottom: 2px solid #d1d5db;
+}
+
+/* Add connecting lines between rounds */
+.round:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -15px;
+  width: 30px;
+  height: 2px;
+  background: #d1d5db;
+  z-index: 1;
+}
+
+.round:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -15px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid #d1d5db;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  z-index: 2;
+}
+
 @media (max-width: 768px) {
   .config-grid {
     grid-template-columns: 1fr;
@@ -1913,5 +1998,52 @@ onMounted(() => {
     min-width: 300px;
     padding: 15px;
   }
+  
+  .bracket-rounds {
+    gap: 20px;
+  }
+  
+  .round {
+    min-width: 250px;
+  }
+}
+
+/* Horizontal Playoff Bracket Styles */
+.round {
+  min-width: 280px;
+  position: relative;
+}
+
+.round h5 {
+  text-align: center;
+  padding: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  border-bottom: 2px solid #d1d5db;
+}
+
+/* Add connecting lines between rounds */
+.round:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -15px;
+  width: 30px;
+  height: 2px;
+  background: #d1d5db;
+  z-index: 1;
+}
+
+.round:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -15px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid #d1d5db;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  z-index: 2;
 }
 </style>
