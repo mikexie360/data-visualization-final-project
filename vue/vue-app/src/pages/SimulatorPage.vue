@@ -277,76 +277,63 @@
 
         <!-- Round-by-Round Results -->
         <div class="rounds-container">
-          <div 
-            v-for="round in store.singleRun.swiss.rounds" 
-            :key="round.round"
-            class="round-section"
-          >
-            <h4>Round {{ round.round }}</h4>
-            
-            <!-- Buckets and Pairings -->
-            <div class="buckets-container">
-              <div 
-                v-for="(bucketTeams, bucketKey) in round.buckets_names" 
-                :key="bucketKey"
-                class="bucket-section"
-              >
-                <h5 class="bucket-title">{{ bucketKey }} ({{ bucketTeams.length }} teams)</h5>
-                
-                <!-- Pairings in this bucket -->
-                <div class="pairings">
-                  <div 
-                    v-for="(pairing, index) in round.pairings.filter(p => {
-                      const teamA = store.singleRun?.teams.find(t => t.id === p.A)?.name || ''
-                      const teamB = store.singleRun?.teams.find(t => t.id === p.B)?.name || ''
-                      return bucketTeams.includes(teamA) || bucketTeams.includes(teamB)
-                    })" 
-                    :key="index"
-                    class="pairing"
-                  >
-                    <div class="match-result">
-                      <div class="team team-a">
-                  <TeamName :team-name="store.singleRun.teams.find(t => t.id === pairing.A)?.name || ''" />
-                </div>
-                      <div class="score">
-                        {{ round.matches.find(m => 
-                          (m.A.id === pairing.A && m.B.id === pairing.B) || 
-                          (m.A.id === pairing.B && m.B.id === pairing.A)
-                        )?.final_score?.[0] || '0' }} - 
-                        {{ round.matches.find(m => 
-                          (m.A.id === pairing.A && m.B.id === pairing.B) || 
-                          (m.A.id === pairing.B && m.B.id === pairing.A)
-                        )?.final_score?.[1] || '0' }}
-                      </div>
-                      <div class="team team-b">
-                  <TeamName :team-name="store.singleRun.teams.find(t => t.id === pairing.B)?.name || ''" />
-                </div>
-                      <div class="winner">
-                        Winner: <TeamName :team-name="round.matches.find(m => 
-                          (m.A.id === pairing.A && m.B.id === pairing.B) || 
-                          (m.A.id === pairing.B && m.B.id === pairing.A)
-                        )?.winner?.name || 'TBD'" />
+          <div class="rounds-grid">
+            <div 
+              v-for="round in store.singleRun.swiss.rounds" 
+              :key="round.round"
+              class="round-section"
+            >
+              <h4>Round {{ round.round }}</h4>
+              
+              <!-- Buckets and Pairings -->
+              <div class="buckets-container">
+                <div 
+                  v-for="(bucketTeams, bucketKey) in round.buckets_names" 
+                  :key="bucketKey"
+                  class="bucket-section"
+                >
+                  <h5 class="bucket-title">{{ bucketKey }} ({{ bucketTeams.length }} teams)</h5>
+                  
+                  <!-- Pairings in this bucket -->
+                  <div class="pairings">
+                    <div 
+                      v-for="(pairing, index) in round.pairings.filter(p => {
+                        const teamA = store.singleRun?.teams.find(t => t.id === p.A)?.name || ''
+                        const teamB = store.singleRun?.teams.find(t => t.id === p.B)?.name || ''
+                        return bucketTeams.includes(teamA) || bucketTeams.includes(teamB)
+                      })" 
+                      :key="index"
+                      class="pairing"
+                    >
+                      <div class="match-result">
+                        <div class="team team-a">
+                    <TeamName :team-name="store.singleRun.teams.find(t => t.id === pairing.A)?.name || ''" />
+                  </div>
+                        <div class="score">
+                          {{ round.matches.find(m => 
+                            (m.A.id === pairing.A && m.B.id === pairing.B) || 
+                            (m.A.id === pairing.B && m.B.id === pairing.A)
+                          )?.final_score?.[0] || '0' }} - 
+                          {{ round.matches.find(m => 
+                            (m.A.id === pairing.A && m.B.id === pairing.B) || 
+                            (m.A.id === pairing.B && m.B.id === pairing.A)
+                          )?.final_score?.[1] || '0' }}
+                        </div>
+                        <div class="team team-b">
+                    <TeamName :team-name="store.singleRun.teams.find(t => t.id === pairing.B)?.name || ''" />
+                  </div>
+                        <div class="winner">
+                          Winner: <TeamName :team-name="round.matches.find(m => 
+                            (m.A.id === pairing.A && m.B.id === pairing.B) || 
+                            (m.A.id === pairing.B && m.B.id === pairing.A)
+                          )?.winner?.name || 'TBD'" />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-
-            <!-- Records after this round -->
-            <!-- <div class="records-after">
-              <h5>Records After Round {{ round.round }}</h5>
-              <div class="records-grid">
-                <div 
-                  v-for="(record, teamId) in round.records_after" 
-                  :key="teamId"
-                  class="record-item"
-                >
-                  <span class="team-name">{{ store.singleRun.teams.find(t => t.id === teamId)?.name }}</span>
-                  <span class="record">{{ record[0] }}-{{ record[1] }}</span>
-                </div>
-              </div>
-            </div> -->
           </div>
         </div>
                          <!-- Final Standings -->
@@ -1366,6 +1353,14 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 25px;
+  overflow-x: auto;
+}
+
+.rounds-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  min-width: max-content;
 }
 
 .round-section {
@@ -1902,6 +1897,21 @@ onMounted(() => {
   
   .advancement-groups {
     grid-template-columns: 1fr;
+  }
+  
+  .rounds-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .rounds-grid {
+    min-width: max-content;
+    gap: 15px;
+  }
+  
+  .round-section {
+    min-width: 300px;
+    padding: 15px;
   }
 }
 </style>
